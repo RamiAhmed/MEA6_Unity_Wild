@@ -131,8 +131,7 @@ public class BuildingObject : UsableObject
 		}
 		else
 		{
-			targetPos = new Vector3(0, 0, HoldingDistance * 1.5f);
-			targetPos = User.transform.TransformPoint(targetPos);
+			targetPos = User.transform.position + User.transform.forward * (HoldingDistance * 1.5f);
 		}
 
 		// Minimum height is calculated by getting the height of the terrain and adding half of the object's own height
@@ -151,7 +150,8 @@ public class BuildingObject : UsableObject
 		// If the rotation vector has been set by player controller
 		if (RotationVector != Vector3.zero)
 		{
-			this.transform.Rotate(RotationVector, RotationSpeed);
+			//this.transform.Rotate(RotationVector, RotationSpeed);
+			this.transform.RotateAround(this.transform.position, RotationVector, RotationSpeed);
 		}
 	}
 	

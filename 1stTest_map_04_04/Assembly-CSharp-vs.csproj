@@ -49,6 +49,7 @@
      <Compile Include="Assets\Scripts\BuildingTrashCan.cs" />
      <Compile Include="Assets\Scripts\PlayerController.cs" />
      <Compile Include="Assets\Scripts\SaveScreenshots.cs" />
+     <Compile Include="Assets\Scripts\TopDownMouseLook.cs" />
      <Compile Include="Assets\Scripts\UsableObject.cs" />
      <None Include="Assets\Standard Assets\Particles\Sources\Shaders\Particle Alpha Blend (Queue +100).shader" />
      <None Include="Assets\Standard Assets\Skyboxes\_skybox info.txt" />

@@ -358,23 +358,32 @@ public class PlayerController : MonoBehaviour {
 	
 	private void PlaceObject()
 	{
-		BuildingObject bo = UsedObject.GetComponent<BuildingObject>();
-		if (bo != null)
+		if (elapsedTime - lastSpawn > 1f)
 		{
-			if (bo.bCanBePlaced)
+			lastSpawn = elapsedTime;
+			
+			BuildingObject bo = UsedObject.GetComponent<BuildingObject>();
+			if (bo != null)
 			{
-				// if the player is currently using an object AND is pressing 'e'
-				ClearObjectReferences();
+				if (bo.bCanBePlaced)
+				{
+					// if the player is currently using an object AND is pressing 'e'
+					ClearObjectReferences();
+				}
+				else
+				{
+					Debug.Log("Cannot place " + UsedObject + " at this position");
+				}
 			}
 			else
 			{
-				Debug.Log("Cannot place " + UsedObject + " at this position");
-			}
+				Debug.LogWarning(UsedObject + " is not a building object!");
+			}	
 		}
 		else
 		{
-			Debug.LogWarning(UsedObject + " is not a building object!");
-		}		
+			Debug.LogWarning("Cannot place again so soon");
+		}
 	}
 	
 	/* USING / PICKING UP */
@@ -481,25 +490,16 @@ public class PlayerController : MonoBehaviour {
 	{
 		if (UsedObject == null)
 		{
-			if (elapsedTime - lastSpawn > 0.5f)
+			// Spawn a new instance of "Building Prefab"
+			GameObject buildingObject = Instantiate(Resources.Load(Prefab)) as GameObject;
+			if (buildingObject != null)
 			{
-				lastSpawn = elapsedTime;
-
-				// Spawn a new instance of "Building Prefab"
-				GameObject buildingObject = Instantiate(Resources.Load(Prefab)) as GameObject;
-				if (buildingObject != null)
-				{
-					// Set that we are using the new building object
-					UseObject(buildingObject);
-				}
-				else
-				{
-					Debug.LogError("Could not instantiate " + Prefab);
-				}
+				// Set that we are using the new building object
+				UseObject(buildingObject);
 			}
 			else
 			{
-				Debug.LogWarning("Cannot spawn again so soon");
+				Debug.LogError("Could not instantiate " + Prefab);
 			}
 		}
 		else

@@ -10,30 +10,33 @@ public class SaveScreenshots : MonoBehaviour
     void LateUpdate()
     {
 		//if (Time.time - lastShot > shotInterval)
-		if (Input.GetKeyDown(KeyCode.F12) || Input.GetKeyDown (KeyCode.Print))
+		if (Input.GetKeyDown(KeyCode.F12) || Input.GetKeyDown(KeyCode.Print))
 		{
-			TakeScreenshot();
+			TakeScreenshot(true);
 		}
     }
 	
-	public void TakeScreenshot()
+	public void TakeScreenshot(bool bEnabledInEditor = false)
 	{
-		string path = @Application.dataPath + @"/Data/Shots/"; 
-		if (!Directory.Exists(path))
+		if (!Application.isEditor || bEnabledInEditor)
 		{
-			Directory.CreateDirectory(path);	
+			string path = @Application.dataPath + @"/Data/Shots/"; 
+			if (!Directory.Exists(path))
+			{
+				Directory.CreateDirectory(path);	
+			}
+			
+	        // take screenshot 
+	        string screenshotFilename;
+	        do
+	        {
+	            screenshotCount++;
+	            screenshotFilename = path + "screenshot" + screenshotCount + ".png";
+	
+	        } while (File.Exists(screenshotFilename));
+	
+	        Application.CaptureScreenshot(screenshotFilename);
+			Debug.Log("Screenshot saved in " + screenshotFilename);		
 		}
-		
-        // take screenshot 
-        string screenshotFilename;
-        do
-        {
-            screenshotCount++;
-            screenshotFilename = path + "screenshot" + screenshotCount + ".png";
-
-        } while (File.Exists(screenshotFilename));
-
-        Application.CaptureScreenshot(screenshotFilename);
-		Debug.Log("Screenshot saved in " + screenshotFilename);		
 	}
 }
