@@ -37,7 +37,9 @@ public class BuildingObject : UsableObject
 	
 	private Collider[] colliders;
 	private Rigidbody[] rigidbodies;
-
+	
+	private float mouseWheelValue = 0f;
+	
 	void Start()
 	{
 		try
@@ -87,6 +89,8 @@ public class BuildingObject : UsableObject
 		// If the usable object currently does not have a user
 		else
 		{
+			mouseWheelValue = 0f;
+			
 			if (!bHasBeenPlaced)
 				bHasBeenPlaced = true;
 	
@@ -109,6 +113,9 @@ public class BuildingObject : UsableObject
 	private void UpdatePosition()
 	{
 		Vector3 targetPos = Vector3.zero;
+		float desiredDistance = HoldingDistance;
+		float playerHeight = User.transform.position.y * 0.5f;
+		
 		if (!User.IsTopDownPlayer)
 		{
 			// Calculate a 2D vector at the middle of the screen
@@ -116,15 +123,14 @@ public class BuildingObject : UsableObject
 
 			// Find the distance from the user to his camera, in order to make the vector longer in non-1st person perspective
 			float distanceMultiplier = (User.transform.position - User.PlayerCamera.transform.position).magnitude;
+			desiredDistance += distanceMultiplier;
 
 			// Define a 3D vector at the middle of the screen, using the HoldingDistance variable for depth (distance from player pawn)
-			targetPos = new Vector3(midScreen.x, midScreen.y, HoldingDistance + distanceMultiplier);
+			targetPos = new Vector3(midScreen.x, midScreen.y, desiredDistance);
 			targetPos = User.PlayerCamera.ScreenToWorldPoint(targetPos);
 		}
 		else
 		{
-			//targetPos = User.transform.position + User.transform.forward * (HoldingDistance * 1.5f);
-			
 			Ray mouseRay = User.PlayerCamera.ScreenPointToRay(Input.mousePosition);
 			RaycastHit[] mouseHits = Physics.RaycastAll(mouseRay.origin, mouseRay.direction, User.PlayerCamera.farClipPlane);
 			
@@ -137,18 +143,28 @@ public class BuildingObject : UsableObject
 					break;
 				}
 			}
-			//Debug.Log("targetPos: " + targetPos);
-			//Debug.Log("targetDistance: " + targetPos.magnitude);
-		}
-
 			
-		// Minimum height is calculated by getting the height of the terrain and adding half of the object's own height
-		float minimumHeight = Terrain.activeTerrain.SampleHeight(targetPos) + this.renderer.bounds.extents.y;
-		if (targetPos.y < minimumHeight)
-		{
-			targetPos.y = minimumHeight;
+			mouseWheelValue += Input.GetAxis("Mouse ScrollWheel");
+			mouseWheelValue = Mathf.Clamp(mouseWheelValue, 0f, playerHeight);
 		}
+		float minimumHeight = Terrain.activeTerrain.SampleHeight(targetPos) + this.renderer.bounds.extents.y;
+		float maximumHeight = minimumHeight + playerHeight;	
+		
+		if (User.IsTopDownPlayer)
+		{
+			float yPos = minimumHeight + mouseWheelValue;
+			targetPos.y = yPos;
+		}
+		
+		targetPos = User.transform.InverseTransformPoint(targetPos);
 
+		targetPos.z = Mathf.Clamp(targetPos.z, -desiredDistance, desiredDistance);
+		targetPos.x = Mathf.Clamp(targetPos.x, -desiredDistance, desiredDistance);
+
+		targetPos = User.transform.TransformPoint(targetPos);
+			
+		targetPos.y = Mathf.Clamp(targetPos.y, minimumHeight, maximumHeight);
+		
 		// Set this building object's transform at the specified vector above, after converting the vector to real in-game 3D positions
 		this.transform.position = targetPos;
 	}

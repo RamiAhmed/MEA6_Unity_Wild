@@ -38,7 +38,6 @@ public class PlayerController : MonoBehaviour {
 	private float lastSpawn = 0f;
 
 	private MouseLook mouseLookComponent;
-
 	
 	private enum GameState
 	{
