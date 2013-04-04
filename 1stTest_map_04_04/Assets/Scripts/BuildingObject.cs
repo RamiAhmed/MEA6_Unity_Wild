@@ -58,17 +58,6 @@ public class BuildingObject : UsableObject
 		if (bRotateRandomOnStart)
 			this.transform.rotation = UnityEngine.Random.rotation;
 	}
-	
-	public void UsedBy(GameObject usedBy)
-	{
-		base.UsedBy(usedBy);
-		
-		if (GetHasUser())
-		{
-			this.rigidbody.isKinematic = true;
-			this.collider.isTrigger = true;
-		}			
-	}
 
 	// FixedUpdate is called once every physics time step. This is the place to do physics-based game behaviour.
 	void FixedUpdate()
