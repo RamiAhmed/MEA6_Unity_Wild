@@ -402,7 +402,11 @@ public class PlayerController : MonoBehaviour {
 				
 				if (okObject)
 				{
-					if (UseObject(sweepHit.collider.gameObject))
+					GameObject hit = sweepHit.collider.gameObject;
+					while (hit.transform.parent != null)
+						hit = hit.transform.parent.gameObject;
+
+					if (UseObject(hit))
 						break;
 				}
 				else

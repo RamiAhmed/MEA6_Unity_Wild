@@ -34,6 +34,9 @@ public class BuildingObject : UsableObject
 	
 	private float timeSincePlaced = 0f;
 	private float sleepTime = 30f;
+	
+	private Collider[] colliders;
+	private Rigidbody[] rigidbodies;
 
 	void Start()
 	{
@@ -57,6 +60,8 @@ public class BuildingObject : UsableObject
 		
 		if (bRotateRandomOnStart)
 			this.transform.rotation = UnityEngine.Random.rotation;
+		
+		InitColliders();
 	}
 
 	// FixedUpdate is called once every physics time step. This is the place to do physics-based game behaviour.
@@ -72,11 +77,7 @@ public class BuildingObject : UsableObject
 
 				UpdateRotation();
 				
-				if (!this.collider.isTrigger)
-					this.collider.isTrigger = true;
-		
-				if (!this.rigidbody.isKinematic)
-					this.rigidbody.isKinematic = true;
+				ToggleCollidersActive(true);
 
 				UpdateMaterialColors();
 				
@@ -88,18 +89,14 @@ public class BuildingObject : UsableObject
 		{
 			if (!bHasBeenPlaced)
 				bHasBeenPlaced = true;
-
-			if (this.collider.isTrigger)
-				this.collider.isTrigger = false;
-			
+	
 			ChangeAllMaterialColors(originalColors);
 			
 			if (timeSincePlaced < sleepTime)
 			{
 				timeSincePlaced += Time.deltaTime;
 					
-				if (this.rigidbody.isKinematic)
-					this.rigidbody.isKinematic = false;				
+				ToggleCollidersActive(false);
 			}
 			else
 			{
@@ -155,6 +152,40 @@ public class BuildingObject : UsableObject
 		if (RotationVector != Vector3.zero)
 		{
 			this.transform.Rotate(RotationVector, RotationSpeed);
+		}
+	}
+	
+	private void InitColliders()
+	{
+		colliders = this.gameObject.GetComponents<Collider>();
+		if (colliders.Length <= 0)
+		{
+			colliders = this.gameObject.GetComponentsInChildren<Collider>();
+			if (colliders.Length <= 0)
+				Debug.LogWarning("Could not find any colliders for " + this.gameObject);
+		}
+		
+		rigidbodies = this.gameObject.GetComponents<Rigidbody>();
+		if (rigidbodies.Length <= 0)
+		{
+			rigidbodies = this.gameObject.GetComponentsInChildren<Rigidbody>();
+			if (rigidbodies.Length <= 0)
+				Debug.LogWarning("Could not find any rigidbodies for " + this.gameObject);
+		}		
+	}
+	
+	private void ToggleCollidersActive(bool enable)
+	{
+		foreach (Collider coll in colliders)
+		{
+			if (coll.isTrigger != enable)
+				coll.isTrigger = enable;
+		}
+		
+		foreach (Rigidbody rBody in rigidbodies)
+		{
+			if (rBody.isKinematic != enable)
+				rBody.isKinematic = enable;
 		}
 	}
 

@@ -11,3 +11,11 @@ Total time: 4.158232, First Person Controller
 Total time: 14.95611, First Person Controller
 Total time: 10.10786, First Person Controller
 Total time: 16.31141, First Person Controller
+Total time: 58.56521, First Person Controller
+Total time: 43.65596, First Person Controller
+Total time: 7.65388, First Person Controller
+Total time: 9.670246, First Person Controller
+Total time: 42.01337, First Person Controller
+Total time: 19.2178, First Person Controller
+Total time: 20.85768, First Person Controller
+Total time: 53.84198, First Person Controller
