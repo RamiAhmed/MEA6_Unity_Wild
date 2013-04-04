@@ -38,6 +38,7 @@ public class PlayerController : MonoBehaviour {
 	private float lastSpawn = 0f;
 
 	private MouseLook mouseLookComponent;
+
 	
 	private enum GameState
 	{
@@ -255,11 +256,14 @@ public class PlayerController : MonoBehaviour {
 	
 	private void SetPlayerActive(bool enable)
 	{
-		if (this.gameObject.GetComponent<MouseLook>().enabled != enable)
-			this.gameObject.GetComponent<MouseLook>().enabled = enable;
-
-		if (PlayerCamera.GetComponent<MouseLook>().enabled != enable)
-			PlayerCamera.GetComponent<MouseLook>().enabled = enable;		
+		if (mouseLookComponent != null)
+		{
+			if (this.gameObject.GetComponent<MouseLook>().enabled != enable)
+				this.gameObject.GetComponent<MouseLook>().enabled = enable;
+	
+			if (PlayerCamera.GetComponent<MouseLook>().enabled != enable)
+				PlayerCamera.GetComponent<MouseLook>().enabled = enable;		
+		}
 	}
 	
 	private void DisableMouseCursorOnControl()
