@@ -396,35 +396,59 @@ public class PlayerController : MonoBehaviour {
 			Vector3 startPos = this.transform.position + cCont.center + (Vector3.up * -cCont.height * 0.5f);
 			Vector3 endPos = startPos + Vector3.up * cCont.height;
 			
-			RaycastHit[] downHits = Physics.RaycastAll(this.transform.position, -this.transform.up, cCont.height);			
-			RaycastHit[] sweepHits = Physics.CapsuleCastAll(startPos, endPos, cCont.radius, this.transform.forward, UseDistance);
+			RaycastHit[] downHits = Physics.RaycastAll(this.transform.position, -this.transform.up, cCont.height);
+			
+			Vector3 forwardVec = this.transform.forward;
+			if (this.IsTopDownPlayer)
+			{
+				Vector3 targetPos = Vector3.zero;
+				Ray mouseRay = this.PlayerCamera.ScreenPointToRay(Input.mousePosition);
+				RaycastHit[] mouseHits = Physics.RaycastAll(mouseRay.origin, mouseRay.direction, this.PlayerCamera.farClipPlane);
+				
+				foreach (RaycastHit mouseHit in mouseHits)
+				{
+					if (mouseHit.collider.GetType() == typeof(TerrainCollider))
+					{
+						targetPos = mouseHit.point;
+						targetPos.y = this.transform.position.y;
+						break;
+					}
+				}	
+				
+				forwardVec = (targetPos - this.transform.position).normalized;
+			}
+			
+			RaycastHit[] sweepHits = Physics.CapsuleCastAll(startPos, endPos, cCont.radius, forwardVec, UseDistance);
 			
 			bool okObject = true;
 			foreach (RaycastHit sweepHit in sweepHits)
 			{
-				foreach (RaycastHit downHit in downHits)
+				if (sweepHit.collider.GetType () != typeof(TerrainCollider))
 				{
-					if (downHit.collider.GetType() != typeof(TerrainCollider))
+					foreach (RaycastHit downHit in downHits)
 					{
-						if (downHit.collider.gameObject == sweepHit.collider.gameObject)
+						if (downHit.collider.GetType() != typeof(TerrainCollider))
 						{
-							okObject = false;				
+							if (downHit.collider.gameObject == sweepHit.collider.gameObject)
+							{
+								okObject = false;				
+							}
 						}
 					}
-				}
-				
-				if (okObject)
-				{
-					GameObject hit = sweepHit.collider.gameObject;
-					while (hit.transform.parent != null)
-						hit = hit.transform.parent.gameObject;
-
-					if (UseObject(hit))
-						break;
-				}
-				else
-				{
-					Debug.LogWarning("Cannot pick up while standing on " + sweepHit.collider.gameObject);
+					
+					if (okObject)
+					{
+						GameObject hit = sweepHit.collider.gameObject;
+						while (hit.transform.parent != null)
+							hit = hit.transform.parent.gameObject;
+	
+						if (UseObject(hit))
+							break;
+					}
+					else
+					{
+						Debug.LogWarning("Cannot pick up while standing on " + sweepHit.collider.gameObject);
+					}
 				}
 			}
 		}

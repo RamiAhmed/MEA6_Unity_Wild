@@ -120,20 +120,28 @@ public class BuildingObject : UsableObject
 			// Define a 3D vector at the middle of the screen, using the HoldingDistance variable for depth (distance from player pawn)
 			targetPos = new Vector3(midScreen.x, midScreen.y, HoldingDistance + distanceMultiplier);
 			targetPos = User.PlayerCamera.ScreenToWorldPoint(targetPos);
-
-			float pawnToObjectDistance = (User.transform.position - targetPos).magnitude;
-			if (pawnToObjectDistance < HoldingDistance)
-			{
-				targetPos = User.transform.InverseTransformPoint(targetPos);
-				targetPos.z += HoldingDistance;
-				targetPos = User.transform.TransformPoint(targetPos);
-			}
 		}
 		else
 		{
-			targetPos = User.transform.position + User.transform.forward * (HoldingDistance * 1.5f);
+			//targetPos = User.transform.position + User.transform.forward * (HoldingDistance * 1.5f);
+			
+			Ray mouseRay = User.PlayerCamera.ScreenPointToRay(Input.mousePosition);
+			RaycastHit[] mouseHits = Physics.RaycastAll(mouseRay.origin, mouseRay.direction, User.PlayerCamera.farClipPlane);
+			
+			foreach (RaycastHit mouseHit in mouseHits)
+			{
+				if (mouseHit.collider.GetType() == typeof(TerrainCollider))
+				{
+					targetPos = mouseHit.point;
+					targetPos.y = 1f;
+					break;
+				}
+			}
+			//Debug.Log("targetPos: " + targetPos);
+			//Debug.Log("targetDistance: " + targetPos.magnitude);
 		}
 
+			
 		// Minimum height is calculated by getting the height of the terrain and adding half of the object's own height
 		float minimumHeight = Terrain.activeTerrain.SampleHeight(targetPos) + this.renderer.bounds.extents.y;
 		if (targetPos.y < minimumHeight)
