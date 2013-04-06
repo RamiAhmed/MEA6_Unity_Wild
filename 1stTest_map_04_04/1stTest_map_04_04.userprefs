@@ -1,6 +1,13 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\ArrowIndicatorController.cs">
+    <Files>
+      <File FileName="Assets\Scripts\PlayerController.cs" Line="199" Column="2" />
+      <File FileName="Assets\Scripts\ScenarioHandler.cs" Line="81" Column="4" />
+      <File FileName="Assets\Scripts\BuildingObject.cs" Line="101" Column="5" />
+      <File FileName="Assets\Scripts\ArrowIndicatorController.cs" Line="45" Column="8" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>

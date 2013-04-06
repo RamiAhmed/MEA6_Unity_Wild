@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\ArrowIndicatorController.cs" />
+     <Compile Include="Assets\Scripts\BuildZone.cs" />
      <Compile Include="Assets\Scripts\BuildingObject.cs" />
      <Compile Include="Assets\Scripts\BuildingTrashCan.cs" />
      <Compile Include="Assets\Scripts\PlayerController.cs" />

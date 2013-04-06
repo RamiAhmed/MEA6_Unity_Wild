@@ -36,11 +36,11 @@ public class ArrowIndicatorController : MonoBehaviour {
 		{
 		
 			if ((pc.transform.position - this.transform.position).magnitude < activationDistance)
-			{
+			{				
 				ToggleRenderers(false);
 			}
 			else
-			{
+			{		
 				float yPos = startY + amplitude * Mathf.Sin(floatSpeed * Time.time);			
 				this.transform.position = new Vector3(this.transform.position.x, yPos, this.transform.position.z);			
 				this.transform.Rotate(this.transform.up, rotationSpeed);			

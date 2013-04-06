@@ -23,7 +23,10 @@ public class PlayerController : MonoBehaviour {
 	public bool IsTopDownPlayer = false;
 
 	public GameObject[] SpawnableBuildingObjects;
-
+	
+	[HideInInspector]
+	public bool bIsTimeCounting = false;
+	
 	// A reference to the player's main camera.
 	[HideInInspector]
 	public Camera PlayerCamera;
@@ -35,8 +38,6 @@ public class PlayerController : MonoBehaviour {
 	[HideInInspector]
 	public List<GameObject> placedObjects = new List<GameObject>();
 
-	private Vector3 startPosition = Vector3.zero;
-	private bool isTimeCounting = false;
 	private float elapsedTime = 0f;
 	private float lastSpawn = 0f;
 
@@ -65,8 +66,6 @@ public class PlayerController : MonoBehaviour {
 			FindCamera("Camera");
 		}
 
-		startPosition = this.transform.position;
-		
 		this.gameObject.AddComponent(typeof(SaveScreenshots));
 		mouseLookComponent = this.gameObject.GetComponent<MouseLook>();
 		
@@ -204,6 +203,8 @@ public class PlayerController : MonoBehaviour {
 					SpawnBuildingObject(spawnObject.name);
 				}
 			}
+			
+			GUI.Label(new Rect(5f, 5f, 100f, 50f), "Time: " + elapsedTime);
 		}
 		
 		else if (currentGameState == GameState.PAUSE)
@@ -222,6 +223,11 @@ public class PlayerController : MonoBehaviour {
 			
 			if (scenarioHandler.GetScenarioCount() > 0)
 			{
+				if (!GUI.skin.box.wordWrap)
+					GUI.skin.box.wordWrap = true;
+				
+				GUI.Box(new Rect(5f, 125f, width-10f, 100f), "When you click 'Next Scenario', the browser will open and we kindly ask you to fill out the next part in the questionnaire");
+				
 				if (GUI.Button(new Rect(0f, 60f, width, 50f), "Next Scenario"))
 				{
 					SaveTimeData();
@@ -308,18 +314,8 @@ public class PlayerController : MonoBehaviour {
 	
 	private void TimeCounting()
 	{
-		if (!isTimeCounting)
-		{
-			if (startPosition.x != this.transform.position.x &&
-				startPosition.z != this.transform.position.z)
-			{
-				isTimeCounting = true;
-			}
-		}
-		else
-		{
+		if (bIsTimeCounting)
 			elapsedTime += Time.deltaTime;
-		}
 	}	
 	
 	/******************************************************
@@ -526,8 +522,8 @@ public class PlayerController : MonoBehaviour {
 				
 				if (UsedObject == null)
 				{
-					SpawnBuildingObject(SpawnableBuildingObjects.ElementAt(i).name);
-					spawn = true;
+					if (SpawnBuildingObject(SpawnableBuildingObjects.ElementAt(i).name) != null)
+						spawn = true;
 				}
 				break;
 			}
@@ -536,7 +532,7 @@ public class PlayerController : MonoBehaviour {
 		return spawn;
 	}
 
-	private void SpawnBuildingObject(string Prefab = "BuildingPrefab")
+	private GameObject SpawnBuildingObject(string Prefab)
 	{
 		if (UsedObject == null)
 		{
@@ -546,6 +542,7 @@ public class PlayerController : MonoBehaviour {
 			{
 				// Set that we are using the new building object
 				UseObject(buildingObject);
+				return buildingObject;
 			}
 			else
 			{
@@ -556,6 +553,8 @@ public class PlayerController : MonoBehaviour {
 		{
 			Debug.LogWarning("Only one object can be used at a time");
 		}
+		
+		return null;
 	}
 	
 	/* CLEARING / REMOVING */
@@ -608,7 +607,7 @@ public class PlayerController : MonoBehaviour {
 				TextWriter tw = new StreamWriter(fullPath, true);
 				//tw.WriteLine("Total time: " + elapsedTime + ", " + this.gameObject.name);
 				//tw.WriteLine("Total time: " + elapsedTime);
-				tw.WriteLine(scenarioHandler.GetCurrentScenario() + " - " + elapsedTime);
+				tw.WriteLine(scenarioHandler.GetCurrentScenario() + " - " + elapsedTime + "\n");
 				
 				if (scenarioHandler.GetScenarioCount() == 0)
 					tw.WriteLine(" ");

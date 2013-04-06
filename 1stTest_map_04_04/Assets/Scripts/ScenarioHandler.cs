@@ -49,18 +49,10 @@ public class ScenarioHandler : MonoBehaviour {
 	{
 		availableScenarios.Add(Scenario.FIRST_PERSON);
 		availableScenarios.Add(Scenario.THIRD_PERSON);
-		availableScenarios.Add(Scenario.TOP_DOWN);
-		
-		/*
-		foreach (GameObject pc in playerControllers)
-		{
-			if (pc.activeSelf)
-				pc.SetActive(false);
-		}	
-		*/	
+		availableScenarios.Add(Scenario.TOP_DOWN);	
 	}
 	
-	public void GetNewRandomScenario(bool bOpenGoogle = true)
+	public void GetNewRandomScenario(bool bOpenGoogle = true, bool bForceOpenBrowser = false)
 	{
 		if (currentPlayer != null)
 		{
@@ -86,10 +78,14 @@ public class ScenarioHandler : MonoBehaviour {
 		{
 			currentPlayer.SetActive(true);
 			playerControllers.Remove(currentPlayer);
-			if (bOpenGoogle)
-				Application.OpenURL("www.google.com");
-			else
-				Application.OpenURL("https://docs.google.com/forms/d/1GpFp6wvW-BsHYD4WQvjkUoT7GWK3n81woKketR_2vgY/viewform");
+			
+			if (!Application.isEditor || bForceOpenBrowser)
+			{			
+				if (bOpenGoogle)
+					Application.OpenURL("www.google.com");
+				else
+					Application.OpenURL("https://docs.google.com/forms/d/1GpFp6wvW-BsHYD4WQvjkUoT7GWK3n81woKketR_2vgY/viewform");
+			}
 		}
 		else
 			Debug.LogError("Could not find player controller in scenario " + currentScenario.ToString());

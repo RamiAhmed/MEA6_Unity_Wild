@@ -21,6 +21,8 @@ public class BuildingObject : UsableObject
 	
 	// Set this to true if building object is supposed to be rotated randomly at start
 	public bool bRotateRandomOnStart = false;
+	
+	public float SecondsToKinematic = 5f;
 
 	[HideInInspector]
 	public Vector3 RotationVector = Vector3.zero;
@@ -33,12 +35,13 @@ public class BuildingObject : UsableObject
 	private bool bCanUseColors = false;
 	
 	private float timeSincePlaced = 0f;
-	private float sleepTime = 30f;
 	
 	private Collider[] colliders;
 	private Rigidbody[] rigidbodies;
 	
 	private float mouseWheelValue = 0f;
+	
+	private bool bIsGrounded = false;
 	
 	void Start()
 	{
@@ -70,7 +73,7 @@ public class BuildingObject : UsableObject
 	void FixedUpdate()
 	{
 		// If the usable object currently has a user
-		if (GetHasUser() && User.UsedObject == this)
+		if (GetHasUser())
 		{
 			// Make sure that the player's UsedObject is this particular object
 			if (User.UsedObject == this)
@@ -79,11 +82,16 @@ public class BuildingObject : UsableObject
 
 				UpdateRotation();
 				
-				ToggleCollidersActive(true);
+				SetCollidersInactive(true);
 
 				UpdateMaterialColors();
 				
 				timeSincePlaced = 0f;
+				bIsGrounded = false;
+			}
+			else
+			{
+				Debug.LogWarning(this.gameObject + " has unknown user : " + this.User);
 			}
 		}
 		// If the usable object currently does not have a user
@@ -96,16 +104,25 @@ public class BuildingObject : UsableObject
 	
 			ChangeAllMaterialColors(originalColors);
 			
-			if (timeSincePlaced < sleepTime)
+
+			if (timeSincePlaced < SecondsToKinematic)
 			{
-				timeSincePlaced += Time.deltaTime;
-					
-				ToggleCollidersActive(false);
+				if (bIsGrounded)
+				{
+					timeSincePlaced += Time.deltaTime;
+				}		
+				
+				SetCollidersInactive(false);
 			}
 			else
 			{
-				if (!this.rigidbody.isKinematic)
-					this.rigidbody.isKinematic = true;
+				foreach (Rigidbody rBody in rigidbodies)
+				{
+					if (!rBody.isKinematic)
+						rBody.isKinematic = true;
+				}
+				
+				//Debug.Log(this.gameObject + " is now kinematic");
 			}
 		}
 	}
@@ -198,7 +215,7 @@ public class BuildingObject : UsableObject
 		}		
 	}
 	
-	private void ToggleCollidersActive(bool enable)
+	private void SetCollidersInactive(bool enable)
 	{
 		foreach (Collider coll in colliders)
 		{
@@ -262,7 +279,7 @@ public class BuildingObject : UsableObject
 
 	void OnTriggerEnter(Collider other)
 	{
-		if (other.collider.GetType() != typeof(TerrainCollider))
+		if (other.collider.GetType() != typeof(TerrainCollider) && other.gameObject.name != "BuildZoneVolume")
 		{
 			//Debug.Log ("Triggering with " + other);
 			collisions++;
@@ -271,7 +288,7 @@ public class BuildingObject : UsableObject
 
 	void OnTriggerExit(Collider other)
 	{
-		if (other.collider.GetType() != typeof(TerrainCollider))
+		if (other.collider.GetType() != typeof(TerrainCollider) && other.gameObject.name != "BuildZoneVolume")
 		{
 			//Debug.Log ("No longer triggering with " + other);
 			collisions--;
@@ -282,6 +299,15 @@ public class BuildingObject : UsableObject
 	{
 		//Debug.Log ("Collision count: " + collisions);
 		return collisions > 0;
+	}
+	
+	void OnCollisionEnter(Collision collInfo)
+	{
+		if (collInfo.collider.GetType() == typeof(TerrainCollider))
+		{
+			if (!bIsGrounded)
+				bIsGrounded = true;
+		}
 	}
 }
 
