@@ -8,6 +8,9 @@ public class ScenarioHandler : MonoBehaviour {
 	
 	public List<GameObject> playerControllers;
 	
+	public string QuestionnaireURL = "https://docs.google.com/forms/d/1GpFp6wvW-BsHYD4WQvjkUoT7GWK3n81woKketR_2vgY/viewform";
+	public string HelperPicURL = "www.google.com";
+	
 	public enum Scenario
 	{
 		FIRST_PERSON = 0, // first person
@@ -52,7 +55,7 @@ public class ScenarioHandler : MonoBehaviour {
 		availableScenarios.Add(Scenario.TOP_DOWN);	
 	}
 	
-	public void GetNewRandomScenario(bool bOpenGoogle = true, bool bForceOpenBrowser = false)
+	public void GetNewRandomScenario(bool bOpenHelper = true, bool bForceOpenBrowser = false)
 	{
 		if (currentPlayer != null)
 		{
@@ -81,10 +84,10 @@ public class ScenarioHandler : MonoBehaviour {
 			
 			if (!Application.isEditor || bForceOpenBrowser)
 			{			
-				if (bOpenGoogle)
-					Application.OpenURL("www.google.com");
+				if (bOpenHelper)
+					Application.OpenURL(HelperPicURL);
 				else
-					Application.OpenURL("https://docs.google.com/forms/d/1GpFp6wvW-BsHYD4WQvjkUoT7GWK3n81woKketR_2vgY/viewform");
+					Application.OpenURL(QuestionnaireURL);
 			}
 		}
 		else

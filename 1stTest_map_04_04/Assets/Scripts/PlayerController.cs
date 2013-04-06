@@ -24,6 +24,8 @@ public class PlayerController : MonoBehaviour {
 
 	public GameObject[] SpawnableBuildingObjects;
 	
+	public bool bPrintTime = false;
+	
 	[HideInInspector]
 	public bool bIsTimeCounting = false;
 	
@@ -204,7 +206,8 @@ public class PlayerController : MonoBehaviour {
 				}
 			}
 			
-			GUI.Label(new Rect(5f, 5f, 100f, 50f), "Time: " + elapsedTime);
+			if (bPrintTime)
+				GUI.Label(new Rect(5f, 5f, 100f, 50f), "Time: " + elapsedTime);
 		}
 		
 		else if (currentGameState == GameState.PAUSE)
@@ -226,7 +229,7 @@ public class PlayerController : MonoBehaviour {
 				if (!GUI.skin.box.wordWrap)
 					GUI.skin.box.wordWrap = true;
 				
-				GUI.Box(new Rect(5f, 125f, width-10f, 100f), "When you click 'Next Scenario', the browser will open and we kindly ask you to fill out the next part in the questionnaire");
+				GUI.Box(new Rect(5f, 125f, width-10f, 100f), "Please fill out the next part in the questionnaire after clicking 'Next Scenario'.");
 				
 				if (GUI.Button(new Rect(0f, 60f, width, 50f), "Next Scenario"))
 				{
@@ -238,6 +241,8 @@ public class PlayerController : MonoBehaviour {
 			}
 			else
 			{
+				GUI.Box(new Rect(5f, 125f, width-10f, 100f), "Please fill out the final part in the questionnaire after clicking 'Exit Game'.");
+				
 				if (GUI.Button(new Rect(0f, 60f, width, 50f), "Exit Game"))
 				{
 					currentGameState = GameState.END;

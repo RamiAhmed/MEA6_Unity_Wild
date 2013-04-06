@@ -15,22 +15,28 @@ public class BuildZone : MonoBehaviour {
 	
 	void OnTriggerEnter(Collider other)
 	{
-		if (other.gameObject == pController.gameObject)
+		if (pController != null)
 		{
-			if (!pController.bIsTimeCounting)
+			if (other.gameObject == pController.gameObject)
 			{
-				pController.bIsTimeCounting = true;		
+				if (!pController.bIsTimeCounting)
+				{
+					pController.bIsTimeCounting = true;		
+				}
 			}
 		}
 	}
 	
 	void OnTriggerExit(Collider other)
 	{
-		if (other.gameObject == pController.gameObject)
+		if (pController != null)
 		{
-			if (pController.bIsTimeCounting)
+			if (other.gameObject == pController.gameObject)
 			{
-				pController.bIsTimeCounting = false;			
+				if (pController.bIsTimeCounting)
+				{
+					pController.bIsTimeCounting = false;			
+				}
 			}
 		}
 	}
