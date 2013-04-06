@@ -31,6 +31,9 @@ public class PlayerController : MonoBehaviour {
 	// A public variable used by scripts, not for the editor, hence [HideInInspector]
 	[HideInInspector]
 	public UsableObject UsedObject = null;
+	
+	[HideInInspector]
+	public List<GameObject> placedObjects = new List<GameObject>();
 
 	private Vector3 startPosition = Vector3.zero;
 	private bool isTimeCounting = false;
@@ -47,7 +50,9 @@ public class PlayerController : MonoBehaviour {
 		END
 	};
 	
-	private GameState currentGameState = GameState.MAIN_MENU;
+	private GameState currentGameState = GameState.PLAY;
+	
+	private ScenarioHandler scenarioHandler;
 	
 	/******************************************************
 	 **************** INITIALIZATION **********************
@@ -64,6 +69,8 @@ public class PlayerController : MonoBehaviour {
 		
 		this.gameObject.AddComponent(typeof(SaveScreenshots));
 		mouseLookComponent = this.gameObject.GetComponent<MouseLook>();
+		
+		scenarioHandler = GameObject.Find("ScenarioHandlerBox").GetComponent<ScenarioHandler>();
 	}
 
 	private bool FindCamera(string CameraName)
@@ -132,7 +139,7 @@ public class PlayerController : MonoBehaviour {
 					currentGameState = GameState.MAIN_MENU;
 				
 				else
-					currentGameState = GameState.END;
+					currentGameState = GameState.PLAY;
 			}
 		}
 	}
@@ -208,19 +215,28 @@ public class PlayerController : MonoBehaviour {
 		else if (currentGameState == GameState.MAIN_MENU)
 		{
 			float width = 200f, height = 400f;
-			float x = Screen.width / 2f - (width / 2f), y = Screen.height/2f - (height/2f);
+			float x = Screen.width / 2f - (width / 2f), y = Screen.height / 2f - (height / 2f);
 			GUI.BeginGroup(new Rect(x, y, width, height));
 			
 			GUI.Box(new Rect(0f, 10f, width, 40f), "Main Menu");
 			
-			if (GUI.Button(new Rect(0f, 60f, width, 50f), "Start/Resume Game"))
+			if (scenarioHandler.GetScenarioCount() > 0)
 			{
-				currentGameState = GameState.PLAY;
+				if (GUI.Button(new Rect(0f, 60f, width, 50f), "Next Scenario"))
+				{
+					SaveTimeData();
+					RemovePlacedObjects();
+					scenarioHandler.GetNewRandomScenario();
+					currentGameState = GameState.PLAY;
+				}
 			}
-			
-			if (GUI.Button(new Rect(0f, 115f, width, 50f), "Exit Game"))
+			else
 			{
-				currentGameState = GameState.END;
+				if (GUI.Button(new Rect(0f, 60f, width, 50f), "Exit Game"))
+				{
+					currentGameState = GameState.END;
+					SaveTimeData();
+				}
 			}
 			
 			GUI.EndGroup();
@@ -368,6 +384,7 @@ public class PlayerController : MonoBehaviour {
 				{
 					// if the player is currently using an object AND is pressing 'e'
 					ClearObjectReferences();
+					placedObjects.Add(bo.gameObject);
 				}
 				else
 				{
@@ -382,6 +399,16 @@ public class PlayerController : MonoBehaviour {
 		else
 		{
 			Debug.LogWarning("Cannot place again so soon");
+		}
+	}
+	
+	private void RemovePlacedObjects()
+	{
+		while (placedObjects.Count > 0)
+		{
+			GameObject obj = placedObjects[0];
+			placedObjects.Remove(obj);
+			Destroy(obj);
 		}
 	}
 	
@@ -557,13 +584,13 @@ public class PlayerController : MonoBehaviour {
 	/******************************************************
 	 **************** EVENTS ******************************
 	 ******************************************************/
-
-	void OnApplicationQuit()
+	
+	private void SaveTimeData()
 	{
 		if (elapsedTime > 0f)
 		{
 			string logFilePath = @Application.dataPath + @"/Data/",
-				   logFileName = @"time_log.txt";
+				   logFileName = "time_log.txt";
 
 			if (!Directory.Exists(logFilePath))
 			{
@@ -579,7 +606,13 @@ public class PlayerController : MonoBehaviour {
 			try
 			{
 				TextWriter tw = new StreamWriter(fullPath, true);
-				tw.WriteLine("Total time: " + elapsedTime + ", " + this.gameObject.name);
+				//tw.WriteLine("Total time: " + elapsedTime + ", " + this.gameObject.name);
+				//tw.WriteLine("Total time: " + elapsedTime);
+				tw.WriteLine(scenarioHandler.GetCurrentScenario() + " - " + elapsedTime);
+				
+				if (scenarioHandler.GetScenarioCount() == 0)
+					tw.WriteLine(" ");
+				
 				tw.Close();
 				tw.Dispose();
 			}
@@ -587,6 +620,13 @@ public class PlayerController : MonoBehaviour {
 			{
 				Debug.LogWarning(e);
 			}
-		}
+			
+			elapsedTime = 0f;
+		}		
+	}
+
+	void OnApplicationQuit()
+	{
+
 	}
 }

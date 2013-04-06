@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections;
 
 public class ArrowIndicatorController : MonoBehaviour {
@@ -9,29 +10,43 @@ public class ArrowIndicatorController : MonoBehaviour {
 	public float rotationSpeed = 5f;
 	
 	private float startY = 0f;
-	private GameObject pc;
+	private GameObject pc = null;
 	private MeshRenderer[] renderers;
 	
 	// Use this for initialization
 	void Start () {
 		startY = this.transform.position.y;
-		pc = GameObject.FindGameObjectWithTag("Player");
 		renderers = this.gameObject.GetComponentsInChildren<MeshRenderer>();
 	}
 	
 	// Update is called once per frame
 	void LateUpdate() {		
-		if ((pc.transform.position - this.transform.position).magnitude < activationDistance)
+		if (pc == null)
 		{
-			ToggleRenderers(false);
+			try
+			{
+				pc = GameObject.FindGameObjectWithTag("Player");
+			}
+			catch (NullReferenceException e)
+			{
+				Debug.LogWarning("Could not find an active player: " + e);
+			}
 		}
 		else
 		{
-			float yPos = startY + amplitude * Mathf.Sin(floatSpeed * Time.time);			
-			this.transform.position = new Vector3(this.transform.position.x, yPos, this.transform.position.z);			
-			this.transform.Rotate(this.transform.up, rotationSpeed);			
-			
-			ToggleRenderers(true);
+		
+			if ((pc.transform.position - this.transform.position).magnitude < activationDistance)
+			{
+				ToggleRenderers(false);
+			}
+			else
+			{
+				float yPos = startY + amplitude * Mathf.Sin(floatSpeed * Time.time);			
+				this.transform.position = new Vector3(this.transform.position.x, yPos, this.transform.position.z);			
+				this.transform.Rotate(this.transform.up, rotationSpeed);			
+				
+				ToggleRenderers(true);
+			}
 		}
 	}
 	
