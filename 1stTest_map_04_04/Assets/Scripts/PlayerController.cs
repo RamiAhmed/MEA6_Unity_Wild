@@ -573,7 +573,7 @@ public class PlayerController : MonoBehaviour {
 			}
 			
 			RaycastHit[] sweepHits = Physics.CapsuleCastAll(startPos, endPos, cCont.radius, forwardVec, UseDistance);
-			Vector3 midScreen = PlayerCamera.ScreenToWorldPoint(new Vector3(Screen.width/2f, Screen.height/2f, 1f));
+			Vector3 midScreen = PlayerCamera.ScreenToWorldPoint(new Vector3(Screen.width/2f, Screen.height/2f, 0f));
 			SortAfterDistance(sweepHits, midScreen);
 			
 			bool okObject = true;
