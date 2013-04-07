@@ -124,8 +124,6 @@ public class PlayerController : MonoBehaviour {
 		{
 			if (Input.GetKeyDown(KeyCode.Pause) || Input.GetKeyDown(KeyCode.P))
 			{
-				//Debug.Log("Pause");
-				
 				if (currentGameState == GameState.PLAY)
 					currentGameState = GameState.PAUSE;
 				
@@ -202,8 +200,8 @@ public class PlayerController : MonoBehaviour {
 			for (int i = 0; i < SpawnableBuildingObjects.Length; i++)
 			{
 				GameObject spawnObject = SpawnableBuildingObjects.ElementAt(i).gameObject;
-				bool newBtn = GUI.Button(new Rect(x + (width * i), y, width, height), (i+1).ToString() + ": Create " + spawnObject.name);
-				if (newBtn)
+				string buttonText = (i+1).ToString() + ": Create " + spawnObject.name;
+				if (GUI.Button(new Rect(x + (width * i), y, width, height), buttonText))
 				{
 					SpawnBuildingObject(spawnObject.name);
 				}
@@ -216,48 +214,46 @@ public class PlayerController : MonoBehaviour {
 		else if (currentGameState == GameState.PAUSE)
 		{
 			float width = 200f, height = 50f;
-			GUI.Box(new Rect(Screen.width/2f - (width/2f), Screen.height/2f - (height/2f), width, height), "GAME IS PAUSED");	
+			GUI.Box(new Rect((Screen.width/2f) - (width/2f), (Screen.height/2f) - (height/2f), width, height), "GAME IS PAUSED");	
 		}
 		
 		else
 		{
 			HandleMainMenu();
 		}
-
 	}
 	
 	private void HandleMainMenu()
 	{
+		float width = 200f, height = 600f;
+		float x = (Screen.width / 2f) - (width / 2f), y = (Screen.height / 2f) - (height / 2f);		
 		float yPos = 0f;
+		
+		GUI.BeginGroup(new Rect(x, y, width, height));
+		
+		GUI.Box(new Rect(0f, yPos, width, 40f), "Main Menu");		
+		yPos += 45f;
+		
 		if (currentGameState == GameState.MAIN_MENU)
-		{
-			float width = 200f, height = 400f;
-			float x = Screen.width / 2f - (width / 2f), y = Screen.height / 2f - (height / 2f);
-			
+		{			
 			if (!GUI.skin.box.wordWrap)
 				GUI.skin.box.wordWrap = true;			
 			
-			GUI.BeginGroup(new Rect(x, y, width, height));
-			
-			yPos += 5f;
-			GUI.Box(new Rect(0f, yPos, width, 40f), "Main Menu");
-			
-			if (scenarioHandler.GetScenarioCount() > 0)
+			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Resume Game", "Resume the game.")))
 			{
-				yPos += 45f;
-				if (GUI.Button(new Rect(0f, yPos, width, 50f), "Resume Game"))
-				{
-					currentGameState = GameState.PLAY;	
-				}
-				
-				yPos += 55f;
-				if (GUI.Button(new Rect(0f, yPos, width, 50f), "Watch Tutorial Videos"))
-				{
-					currentGameState = GameState.TUTORIAL_PAGE;
-				}
+				currentGameState = GameState.PLAY;	
+			}
 			
-				yPos += 55f;
-				if (GUI.Button(new Rect(0f, yPos, width, 50f), "Next Scenario"))
+			yPos += 55f;
+			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Watch Tutorial Videos", "Watch tutorial material including 3 videos and a cheat sheet stating the controls.")))
+			{
+				currentGameState = GameState.TUTORIAL_PAGE;
+			}	
+			
+			yPos += 55f;
+			if (scenarioHandler.GetScenarioCount() > 0)
+			{	
+				if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Next Scenario", "Progress to the next random scenario. Scenarios left: " + scenarioHandler.GetScenarioCount() + ".")))
 				{
 					SaveTimeData();
 					RemovePlacedObjects();
@@ -266,99 +262,85 @@ public class PlayerController : MonoBehaviour {
 				}
 				
 				yPos += 55f;
-				GUI.Box(new Rect(5f, yPos, width-10f, 75f), "Please fill out the next part in the questionnaire after clicking 'Next Scenario'.");
+				GUI.Box(new Rect(5f, yPos, width-5f, 75f), "Please fill out the next part in the questionnaire after clicking 'Next Scenario'.");
+				yPos += 25f;
 			}
 			else
-			{
-				yPos += 45f;
-				if (GUI.Button(new Rect(0f, yPos, width, 50f), "Resume Game"))
+			{						
+				if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Exit Game", "Exit the game.")))
 				{
-					currentGameState = GameState.PLAY;	
-				}
-				
-				yPos += 55f;
-				if (GUI.Button(new Rect(0f, yPos, width, 50f), "Watch Tutorial Videos"))
-				{
-					currentGameState = GameState.TUTORIAL_PAGE;
-				}
-			
-				yPos += 55f;				
-				if (GUI.Button(new Rect(0f, yPos, width, 50f), "Exit Game"))
-				{
-					currentGameState = GameState.END;
 					SaveTimeData();
+					currentGameState = GameState.END;
 				}
 				
 				yPos += 55f;
-				GUI.Box(new Rect(5f, yPos, width-10f, 75f), "Please fill out the final part in the questionnaire after clicking 'Exit Game'.");
-			}
-			
-			GUI.EndGroup();
+				GUI.Box(new Rect(5f, yPos, width-5f, 75f), "Please fill out the final part in the questionnaire after clicking 'Exit Game'.");
+				yPos += 25f;
+			}	
 		}
 		
 		else if (currentGameState == GameState.TUTORIAL_PAGE)
-		{
-			float width = 200f, height = 400f;
-			float x = Screen.width / 2f - (width / 2f), y = Screen.height / 2f - (height / 2f);
-			GUI.BeginGroup(new Rect(x, y, width, height));
+		{			
+			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Cheat Sheet (Controls)", "See the controls Cheat Sheet, explaining briefly the game's controls.")))
+			{
+				Application.OpenURL("https://docs.google.com/file/d/0B1xZRCO0P8gZdEdkTFlMLW1CNTA/edit?usp=sharing");
+			}
 			
-			yPos += 5f;
-			GUI.Box(new Rect(0f, yPos, width, 40f), "Main Menu - Video Tutorials");			
-			
-			yPos += 45f;
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), "Introduction"))
+			yPos += 55f;
+			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Introduction", "Watch an introductory video for non Top-Down perspective, explaining the assignment.")))
 			{
 				Application.OpenURL("http://www.youtube.com/watch?v=v8u0ikQE3ac");
 			}
 			
 			yPos += 55f;
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), "Rotations"))
+			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Rotations", "Watch a tutorial video explaining how to rotate objects in-game.")))
 			{
 				Application.OpenURL("http://www.youtube.com/watch?v=16dB1WaXG9s");	
 			}
 			
 			yPos += 55f;
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), "Top-Down"))
+			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Top-Down", "Watch an introductory video for Top-Down perspective, explaining the assignment.")))
 			{
 				Application.OpenURL("http://www.youtube.com/watch?v=Jjfb25lYNlQ");	
 			}
 			
 			yPos += 55f;
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), "Back to Main Menu"))
+			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Back to Main Menu", "Return to the main menu.")))
 			{
 				currentGameState = GameState.MAIN_MENU;	
 			}
 			
 			yPos += 55f;
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), "Resume Game"))
+			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Resume Game", "Resume the game.")))
 			{
 				currentGameState = GameState.PLAY;
-			}
-			
-			GUI.EndGroup();
+			}		
 		}
 		
 		else if (currentGameState == GameState.END)
-		{
-			float width = 200f, height = 400f;
-			float x = Screen.width / 2f - (width / 2f), y = Screen.height/2f - (height/2f);
-			GUI.BeginGroup(new Rect(x, y, width, height));
+		{	
+			GUI.Box(new Rect(0f, yPos, width, 40f), "Are you sure you want to exit?");
 			
-			GUI.Box(new Rect(0f, 10f, width, 40f), "Are you sure you want to exit?");
-			
-			if (GUI.Button(new Rect(0f, 50f, width/2f, 50f), "Yes"))
+			yPos += 45f;
+			if (GUI.Button(new Rect(0f, yPos, width/2f, 50f), new GUIContent("Yes", "Click this button if you're sure you want to exit the game.")))
 			{
 				Debug.Log("Shutting down");
 				Application.Quit();
 			}
 			
-			if (GUI.Button(new Rect(width/2f, 50f, width/2f, 50f), "No"))
+			if (GUI.Button(new Rect(width/2f, yPos, width/2f, 50f), new GUIContent("No", "Click this button if you want to go back to the main menu.")))
 			{
 				currentGameState = GameState.MAIN_MENU;
 			}
-			
-			GUI.EndGroup();
-		}		
+		}	
+		
+		if (GUI.tooltip != "")
+		{
+			yPos += 55f;
+			GUI.Box(new Rect(5f, yPos, width-5f, 60f), GUI.tooltip);
+		}
+		
+		GUI.EndGroup();
 	}
 	
 	/******************************************************
@@ -367,11 +349,11 @@ public class PlayerController : MonoBehaviour {
 	
 	private void SortAfterDistance(RaycastHit[] array, Vector3 compareTo)
 	{
-		
-		bool swapped = false;
+		bool swapped;
 		int i, j;
 		for (i = 0; i < array.Count(); i++)
 		{
+			swapped = false;
 			for (j = 1; j < array.Count(); j++)
 			{
 				float aDist = (array[j-1].point - compareTo).sqrMagnitude;
@@ -410,23 +392,57 @@ public class PlayerController : MonoBehaviour {
 			if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
 			{
 				if (Screen.lockCursor)
-				{
 					Screen.lockCursor = false;
-				}
 				
 				SetPlayerActive(false);
 			}
 			else
 			{
 				if (!Screen.lockCursor)
-				{
 					Screen.lockCursor = true;
-				}
 				
 				SetPlayerActive(true);
 			}
 		}		
 	}
+	
+	private void SaveTimeData()
+	{
+		if (elapsedTime > 0f)
+		{
+			string logFilePath = @Application.dataPath + @"/Data/",
+				   logFileName = "time_log.txt";
+
+			if (!Directory.Exists(logFilePath))
+			{
+				Directory.CreateDirectory(logFilePath);
+			}
+
+			string fullPath = logFilePath + logFileName;
+			if (!File.Exists(fullPath))
+			{
+				File.Create(fullPath).Close();
+			}
+
+			try
+			{
+				TextWriter tw = new StreamWriter(fullPath, true);
+				tw.WriteLine(scenarioHandler.GetCurrentScenario() + " - " + elapsedTime + "\n");
+				
+				if (scenarioHandler.GetScenarioCount() == 0)
+					tw.WriteLine(" ");
+				
+				tw.Close();
+				tw.Dispose();
+			}
+			catch (IOException e)
+			{
+				Debug.LogWarning("SaveTimeData() exception: " + e);
+			}
+			
+			elapsedTime = 0f;
+		}		
+	}	
 	
 	private void TimeCounting()
 	{
@@ -557,7 +573,7 @@ public class PlayerController : MonoBehaviour {
 			}
 			
 			RaycastHit[] sweepHits = Physics.CapsuleCastAll(startPos, endPos, cCont.radius, forwardVec, UseDistance);
-			Vector3 midScreen = PlayerCamera.ScreenToWorldPoint(new Vector3(Screen.width/2f, Screen.height/2f, UseDistance));
+			Vector3 midScreen = PlayerCamera.ScreenToWorldPoint(new Vector3(Screen.width/2f, Screen.height/2f, 1f));
 			SortAfterDistance(sweepHits, midScreen);
 			
 			bool okObject = true;
@@ -696,55 +712,5 @@ public class PlayerController : MonoBehaviour {
 		{
 			Debug.LogWarning("No used object to clear references from");
 		}
-	}	
-	
-	/******************************************************
-	 **************** EVENTS ******************************
-	 ******************************************************/
-	
-	private void SaveTimeData()
-	{
-		if (elapsedTime > 0f)
-		{
-			string logFilePath = @Application.dataPath + @"/Data/",
-				   logFileName = "time_log.txt";
-
-			if (!Directory.Exists(logFilePath))
-			{
-				Directory.CreateDirectory(logFilePath);
-			}
-
-			string fullPath = logFilePath + logFileName;
-			if (!File.Exists(fullPath))
-			{
-				File.Create(fullPath).Close();
-			}
-
-			try
-			{
-				TextWriter tw = new StreamWriter(fullPath, true);
-				//tw.WriteLine("Total time: " + elapsedTime + ", " + this.gameObject.name);
-				//tw.WriteLine("Total time: " + elapsedTime);
-				tw.WriteLine(scenarioHandler.GetCurrentScenario() + " - " + elapsedTime + "\n");
-				
-				if (scenarioHandler.GetScenarioCount() == 0)
-					tw.WriteLine(" ");
-				
-				tw.Close();
-				tw.Dispose();
-			}
-			catch (IOException e)
-			{
-				Debug.LogWarning(e);
-			}
-			
-			elapsedTime = 0f;
-		}		
-	}
-
-	void OnApplicationQuit()
-	{
-
-	}
-	
+	}		
 }

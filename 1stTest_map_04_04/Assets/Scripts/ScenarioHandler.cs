@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class ScenarioHandler : MonoBehaviour {
 	
-	public bool bShowCurrentScenario;
+	public bool bShowCurrentScenario = true;
 	
 	public List<GameObject> playerControllers;
 	
@@ -26,8 +26,6 @@ public class ScenarioHandler : MonoBehaviour {
 	// Use this for initialization
 	void Start() 
 	{
-		//DontDestroyOnLoad(this.gameObject);
-		
 		InitScenario();
 		GetNewRandomScenario(false);		
 	}
@@ -35,7 +33,20 @@ public class ScenarioHandler : MonoBehaviour {
 	void OnGUI()
 	{
 		if (bShowCurrentScenario)
-			GUI.Box(new Rect(Screen.width - 250f, 10f, 200f, 50f), "Scenario: " + currentScenario.ToString());
+		{
+			string currentScenarioText = "";
+			
+			switch (currentScenario)
+			{
+				case Scenario.FIRST_PERSON: currentScenarioText = "First Person"; break;
+				case Scenario.THIRD_PERSON: currentScenarioText = "Third Person"; break;
+				case Scenario.TOP_DOWN: currentScenarioText = "Top-Down"; break;
+			}
+			
+			currentScenarioText += " Perspective";
+			
+			GUI.Box(new Rect(Screen.width - 250f, 10f, 200f, 25f), currentScenarioText);
+		}
 	}
 	
 	public Scenario GetCurrentScenario()
