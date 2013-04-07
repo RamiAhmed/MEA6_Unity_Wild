@@ -161,8 +161,8 @@ public class PlayerController : MonoBehaviour {
 		// disable the mouse cursor unless holding CTRL
 		DisableMouseCursorOnControl();
 
-		// If the player pressed 'E' or left mouse click
-		if (Input.GetKeyDown(KeyCode.E) || Input.GetMouseButtonDown(0))
+		// If the player pressed 'E'
+		if (Input.GetKeyDown(KeyCode.E))
 		{
 			// If the player is currently not using an object
 			if (UsedObject == null)
@@ -170,7 +170,13 @@ public class PlayerController : MonoBehaviour {
 				// sweep in front of player in search of usable objects
 				SweepTestToUse();
 			}
-			else
+		}
+			
+		// if the player clicked left mouse button
+		else if (Input.GetMouseButtonDown(0))
+		{
+			// if the player is currently using an object
+			if (UsedObject != null)
 			{
 				// place the currently used object
 				PlaceObject();
