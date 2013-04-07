@@ -289,25 +289,31 @@ public class PlayerController : MonoBehaviour {
 		{			
 			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Cheat Sheet (Controls)", "See the controls Cheat Sheet, explaining briefly the game's controls.")))
 			{
-				Application.OpenURL("https://docs.google.com/file/d/0B1xZRCO0P8gZdEdkTFlMLW1CNTA/edit?usp=sharing");
+				Application.OpenURL("https://docs.google.com/file/d/0B1xZRCO0P8gZODltQkxGanFmTkk/edit?usp=sharing");
 			}
 			
 			yPos += 55f;
 			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Introduction", "Watch an introductory video for non Top-Down perspective, explaining the assignment.")))
 			{
-				Application.OpenURL("http://www.youtube.com/watch?v=v8u0ikQE3ac");
+				Application.OpenURL("http://www.youtube.com/watch?v=J--ycE1f0Q0&feature=youtu.be");
 			}
 			
 			yPos += 55f;
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Rotations", "Watch a tutorial video explaining how to rotate objects in-game.")))
+			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Top-Down Introduction", "Watch an introductory video for Top-Down perspective, explaining the assignment.")))
+			{
+				Application.OpenURL("http://www.youtube.com/watch?v=Jjfb25lYNlQ");	
+			}			
+			
+			yPos += 55f;
+			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Rotating Objects", "Watch a tutorial video explaining how to rotate objects in-game.")))
 			{
 				Application.OpenURL("http://www.youtube.com/watch?v=16dB1WaXG9s");	
 			}
 			
 			yPos += 55f;
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Top-Down", "Watch an introductory video for Top-Down perspective, explaining the assignment.")))
+			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Picking up & Deleting", "Watch a tutorial video explaining how to pick up, drop and delete objects.")))
 			{
-				Application.OpenURL("http://www.youtube.com/watch?v=Jjfb25lYNlQ");	
+				Application.OpenURL("http://www.youtube.com/watch?v=uVD7C1pxfsk&feature=youtu.be");	
 			}
 			
 			yPos += 55f;
