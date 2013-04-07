@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -8,8 +9,8 @@ public class ScenarioHandler : MonoBehaviour {
 	
 	public List<GameObject> playerControllers;
 	
-	public string QuestionnaireURL = "https://docs.google.com/forms/d/1GpFp6wvW-BsHYD4WQvjkUoT7GWK3n81woKketR_2vgY/viewform";
-	public string HelperPicURL = "www.google.com";
+	private string QuestionnaireURL = "https://docs.google.com/forms/d/1GpFp6wvW-BsHYD4WQvjkUoT7GWK3n81woKketR_2vgY/viewform";
+	private string HelperPicURL = "https://docs.google.com/file/d/0B1xZRCO0P8gZUkdPVXVtMEg2TlU/edit?usp=sharing";
 	
 	public enum Scenario
 	{
@@ -76,7 +77,7 @@ public class ScenarioHandler : MonoBehaviour {
 		
 		if (availableScenarios.Count > 1)
 		{
-			int randomIndex = Random.Range(0, availableScenarios.Count);
+			int randomIndex = UnityEngine.Random.Range(0, availableScenarios.Count);
 			currentScenario = availableScenarios[randomIndex]; 
 			currentPlayer = playerControllers[randomIndex];
 		}
