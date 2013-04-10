@@ -9,7 +9,6 @@ public class SaveScreenshots : MonoBehaviour
     // Check for screenshot key each frame
     void LateUpdate()
     {
-		//if (Time.time - lastShot > shotInterval)
 		if (Input.GetKeyDown(KeyCode.F12) || Input.GetKeyDown(KeyCode.Print))
 		{
 			TakeScreenshot(true);

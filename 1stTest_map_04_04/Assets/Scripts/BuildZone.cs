@@ -6,7 +6,7 @@ public class BuildZone : MonoBehaviour {
 	private PlayerController pController = null;
 	
 	// Update is called once per frame
-	void Update () {
+	void Start () {
 		if (pController == null)
 		{
 			pController = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();

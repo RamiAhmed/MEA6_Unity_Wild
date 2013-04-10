@@ -3,12 +3,12 @@ using System.Collections;
 
 public class BuildingTrashCan : MonoBehaviour
 {
-	private GameObject playerRef = null;
+	private PlayerController playerRef = null;
 	
 	void OnTriggerEnter(Collider other)
 	{
 		if (playerRef == null)
-			playerRef = GameObject.FindGameObjectWithTag("Player");
+			playerRef = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
 		
 		GameObject otherGO = other.gameObject;
 		while (otherGO.transform.parent != null)
@@ -19,7 +19,7 @@ public class BuildingTrashCan : MonoBehaviour
 		{
 			if (!otherBO.GetHasUser())
 			{
-				playerRef.GetComponent<PlayerController>().placedObjects.Remove(otherGO);
+				playerRef.placedObjects.Remove(otherGO);
 				Destroy(otherGO);	
 			}
 		}

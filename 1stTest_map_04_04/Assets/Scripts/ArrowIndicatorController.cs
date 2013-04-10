@@ -17,36 +17,22 @@ public class ArrowIndicatorController : MonoBehaviour {
 	void Start () {
 		startY = this.transform.position.y;
 		renderers = this.gameObject.GetComponentsInChildren<MeshRenderer>();
+		pc = GameObject.FindGameObjectWithTag("Player");
 	}
 	
 	// Update is called once per frame
 	void LateUpdate() {		
-		if (pc == null)
-		{
-			try
-			{
-				pc = GameObject.FindGameObjectWithTag("Player");
-			}
-			catch (NullReferenceException e)
-			{
-				Debug.LogWarning("Could not find an active player: " + e);
-			}
+		if ((pc.transform.position - this.transform.position).magnitude < activationDistance)
+		{				
+			ToggleRenderers(false);
 		}
 		else
-		{
-		
-			if ((pc.transform.position - this.transform.position).magnitude < activationDistance)
-			{				
-				ToggleRenderers(false);
-			}
-			else
-			{		
-				float yPos = startY + amplitude * Mathf.Sin(floatSpeed * Time.time);			
-				this.transform.position = new Vector3(this.transform.position.x, yPos, this.transform.position.z);			
-				this.transform.Rotate(this.transform.up, rotationSpeed);			
-				
-				ToggleRenderers(true);
-			}
+		{		
+			float yPos = startY + amplitude * Mathf.Sin(floatSpeed * Time.time);			
+			this.transform.position = new Vector3(this.transform.position.x, yPos, this.transform.position.z);			
+			this.transform.Rotate(this.transform.up, rotationSpeed);			
+			
+			ToggleRenderers(true);
 		}
 	}
 	

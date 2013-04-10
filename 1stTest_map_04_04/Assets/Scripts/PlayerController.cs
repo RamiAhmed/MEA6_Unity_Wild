@@ -19,9 +19,6 @@ public class PlayerController : MonoBehaviour {
 	// UseDistance controls the interaction distance, i.e. within 2 Unity units the player may interact with usable objects
 	public float UseDistance = 2.0f;
 
-	// Defines whether this player controller is top-down or not
-	public bool IsTopDownPlayer = false;
-
 	public GameObject[] SpawnableBuildingObjects;
 	
 	public bool bPrintTime = false;
@@ -44,17 +41,6 @@ public class PlayerController : MonoBehaviour {
 	private float lastSpawn = 0f;
 
 	private MouseLook mouseLookComponent;
-	
-	private enum GameState
-	{
-		MAIN_MENU,
-		TUTORIAL_PAGE,
-		PLAY,
-		PAUSE,
-		END
-	};
-	
-	private GameState currentGameState = GameState.PLAY;
 	
 	private ScenarioHandler scenarioHandler;
 	
@@ -99,7 +85,8 @@ public class PlayerController : MonoBehaviour {
 	// Update is called once per frame
 	void Update() 
 	{
-		if (currentGameState == GameState.PLAY)
+		GameStateHandler.GameState currentGameState = GameStateHandler.GetCurrentGameState();
+		if (currentGameState == GameStateHandler.GameState.PLAY)
 		{
 			SetPlayerActive(true);
 			if (Time.timeScale != 1f)
@@ -120,28 +107,25 @@ public class PlayerController : MonoBehaviour {
 				Time.timeScale = 0f;
 		} 
 		
-		if (currentGameState != GameState.END)
+		if (currentGameState != GameStateHandler.GameState.END)
 		{
 			if (Input.GetKeyDown(KeyCode.Pause) || Input.GetKeyDown(KeyCode.P))
 			{
-				if (currentGameState == GameState.PLAY)
-					currentGameState = GameState.PAUSE;
+				if (currentGameState == GameStateHandler.GameState.PLAY)
+					GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.PAUSE);
 				
-				else if (currentGameState == GameState.PAUSE)
-					currentGameState = GameState.PLAY;
+				else if (currentGameState == GameStateHandler.GameState.PAUSE)
+					GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.PLAY);
 			}
 			
 			// If the player pressed 'Escape'/'Esc'
 			if (Input.GetKeyDown(KeyCode.Escape))
 			{
-				//if (this.gameObject.GetComponent<SaveScreenshots>() != null)
-				//	this.gameObject.GetComponent<SaveScreenshots>().TakeScreenshot();
-				
-				if (currentGameState != GameState.MAIN_MENU)
-					currentGameState = GameState.MAIN_MENU;
+				if (currentGameState != GameStateHandler.GameState.MAIN_MENU)
+					GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.MAIN_MENU);
 				
 				else
-					currentGameState = GameState.PLAY;
+					GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.PLAY);
 			}
 		}
 	}
@@ -182,6 +166,15 @@ public class PlayerController : MonoBehaviour {
 				PlaceObject();
 			}
 		}
+		
+		else if (Input.GetKey(KeyCode.Period))
+		{
+			//Debug.Log ("Delete");
+			if (UsedObject != null)
+			{
+				ClearObjectReferences(true);		
+			}
+		}
 
 		else
 		{
@@ -198,7 +191,8 @@ public class PlayerController : MonoBehaviour {
 
 	void OnGUI()
 	{
-		if (currentGameState == GameState.PLAY)
+		GameStateHandler.GameState currentGameState = GameStateHandler.GetCurrentGameState();
+		if (currentGameState == GameStateHandler.GameState.PLAY)
 		{
 			float width = 150f, height = 50f;
 			float x = 5f, y = Screen.height - height - 5f;
@@ -217,7 +211,7 @@ public class PlayerController : MonoBehaviour {
 				GUI.Label(new Rect(5f, 5f, 100f, 50f), "Time: " + elapsedTime);
 		}
 		
-		else if (currentGameState == GameState.PAUSE)
+		else if (currentGameState == GameStateHandler.GameState.PAUSE)
 		{
 			float width = 200f, height = 50f;
 			GUI.Box(new Rect((Screen.width/2f) - (width/2f), (Screen.height/2f) - (height/2f), width, height), "GAME IS PAUSED");	
@@ -231,7 +225,7 @@ public class PlayerController : MonoBehaviour {
 	
 	private void HandleMainMenu()
 	{
-		float width = 200f, height = 600f;
+		float width = 200f, height = 400f;
 		float x = (Screen.width / 2f) - (width / 2f), y = (Screen.height / 2f) - (height / 2f);		
 		float yPos = 0f;
 		
@@ -240,96 +234,42 @@ public class PlayerController : MonoBehaviour {
 		GUI.Box(new Rect(0f, yPos, width, 40f), "Main Menu");		
 		yPos += 45f;
 		
-		if (currentGameState == GameState.MAIN_MENU)
+		GameStateHandler.GameState currentGameState = GameStateHandler.GetCurrentGameState();
+		
+		if (currentGameState == GameStateHandler.GameState.MAIN_MENU)
 		{			
 			if (!GUI.skin.box.wordWrap)
 				GUI.skin.box.wordWrap = true;			
 			
 			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Resume Game", "Resume the game.")))
 			{
-				currentGameState = GameState.PLAY;	
+				GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.PLAY);	
 			}
-			
-			yPos += 55f;
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Watch Tutorial Videos", "Watch tutorial material including 3 videos and a cheat sheet stating the controls.")))
-			{
-				currentGameState = GameState.TUTORIAL_PAGE;
-			}	
-			
+				
 			yPos += 55f;
 			if (scenarioHandler.GetScenarioCount() > 0)
 			{	
 				if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Next Scenario", "Progress to the next random scenario. Scenarios left: " + scenarioHandler.GetScenarioCount() + ".")))
 				{
-					SaveTimeData();
 					RemovePlacedObjects();
 					scenarioHandler.GetNewRandomScenario();
-					currentGameState = GameState.PLAY;
+					GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.PLAY);
 				}
 				
 				yPos += 55f;
-				GUI.Box(new Rect(5f, yPos, width-5f, 75f), "Please fill out the next part in the questionnaire after clicking 'Next Scenario'.");
-				yPos += 25f;
 			}
 			else
 			{						
 				if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Exit Game", "Exit the game.")))
 				{
-					SaveTimeData();
-					currentGameState = GameState.END;
+					GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.END);
 				}
 				
 				yPos += 55f;
-				GUI.Box(new Rect(5f, yPos, width-5f, 75f), "Please fill out the final part in the questionnaire after clicking 'Exit Game'.");
-				yPos += 25f;
 			}	
 		}
 		
-		else if (currentGameState == GameState.TUTORIAL_PAGE)
-		{			
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Cheat Sheet (Controls)", "See the controls Cheat Sheet, explaining briefly the game's controls.")))
-			{
-				Application.OpenURL("https://docs.google.com/file/d/0B1xZRCO0P8gZODltQkxGanFmTkk/edit?usp=sharing");
-			}
-			
-			yPos += 55f;
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Introduction", "Watch an introductory video for non Top-Down perspective, explaining the assignment.")))
-			{
-				Application.OpenURL("http://www.youtube.com/watch?v=J--ycE1f0Q0&feature=youtu.be");
-			}
-			
-			yPos += 55f;
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Top-Down Introduction", "Watch an introductory video for Top-Down perspective, explaining the assignment.")))
-			{
-				Application.OpenURL("http://www.youtube.com/watch?v=Jjfb25lYNlQ");	
-			}			
-			
-			yPos += 55f;
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Rotating Objects", "Watch a tutorial video explaining how to rotate objects in-game.")))
-			{
-				Application.OpenURL("http://www.youtube.com/watch?v=16dB1WaXG9s");	
-			}
-			
-			yPos += 55f;
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Picking up & Deleting", "Watch a tutorial video explaining how to pick up, drop and delete objects.")))
-			{
-				Application.OpenURL("http://www.youtube.com/watch?v=uVD7C1pxfsk&feature=youtu.be");	
-			}
-			
-			yPos += 55f;
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Back to Main Menu", "Return to the main menu.")))
-			{
-				currentGameState = GameState.MAIN_MENU;	
-			}
-			
-			yPos += 55f;
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Resume Game", "Resume the game.")))
-			{
-				currentGameState = GameState.PLAY;
-			}		
-		}
-		
-		else if (currentGameState == GameState.END)
+		else if (currentGameState == GameStateHandler.GameState.END)
 		{	
 			GUI.Box(new Rect(0f, yPos, width, 40f), "Are you sure you want to exit?");
 			
@@ -342,7 +282,7 @@ public class PlayerController : MonoBehaviour {
 			
 			if (GUI.Button(new Rect(width/2f, yPos, width/2f, 50f), new GUIContent("No", "Click this button if you want to go back to the main menu.")))
 			{
-				currentGameState = GameState.MAIN_MENU;
+				GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.MAIN_MENU);
 			}
 		}	
 		
@@ -417,45 +357,7 @@ public class PlayerController : MonoBehaviour {
 			}
 		}		
 	}
-	
-	private void SaveTimeData()
-	{
-		if (elapsedTime > 0f)
-		{
-			string logFilePath = @Application.dataPath + @"/Data/",
-				   logFileName = "time_log.txt";
 
-			if (!Directory.Exists(logFilePath))
-			{
-				Directory.CreateDirectory(logFilePath);
-			}
-
-			string fullPath = logFilePath + logFileName;
-			if (!File.Exists(fullPath))
-			{
-				File.Create(fullPath).Close();
-			}
-
-			try
-			{
-				TextWriter tw = new StreamWriter(fullPath, true);
-				tw.WriteLine(scenarioHandler.GetCurrentScenario() + " - " + elapsedTime + "\n");
-				
-				if (scenarioHandler.GetScenarioCount() == 0)
-					tw.WriteLine(" ");
-				
-				tw.Close();
-				tw.Dispose();
-			}
-			catch (IOException e)
-			{
-				Debug.LogWarning("SaveTimeData() exception: " + e);
-			}
-			
-			elapsedTime = 0f;
-		}		
-	}	
-	
 	private void TimeCounting()
 	{
 		if (bIsTimeCounting)
@@ -565,24 +467,6 @@ public class PlayerController : MonoBehaviour {
 			RaycastHit[] downHits = Physics.RaycastAll(this.transform.position, -this.transform.up, cCont.height);
 			
 			Vector3 forwardVec = this.transform.forward;
-			if (this.IsTopDownPlayer)
-			{
-				Vector3 targetPos = Vector3.zero;
-				Ray mouseRay = this.PlayerCamera.ScreenPointToRay(Input.mousePosition);
-				RaycastHit[] mouseHits = Physics.RaycastAll(mouseRay.origin, mouseRay.direction, this.PlayerCamera.farClipPlane);
-				
-				foreach (RaycastHit mouseHit in mouseHits)
-				{
-					if (mouseHit.collider.GetType() == typeof(TerrainCollider))
-					{
-						targetPos = mouseHit.point;
-						targetPos.y = this.transform.position.y;
-						break;
-					}
-				}	
-				
-				forwardVec = (targetPos - this.transform.position).normalized;
-			}
 			
 			RaycastHit[] sweepHits = Physics.CapsuleCastAll(startPos, endPos, cCont.radius, forwardVec, UseDistance);
 			Vector3 midScreen = PlayerCamera.ScreenToWorldPoint(new Vector3(Screen.width/2f, Screen.height/2f, 0f));

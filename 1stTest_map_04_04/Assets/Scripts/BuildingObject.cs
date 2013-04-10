@@ -39,8 +39,6 @@ public class BuildingObject : UsableObject
 	private Collider[] colliders;
 	private Rigidbody[] rigidbodies;
 	
-	private float mouseWheelValue = 0f;
-	
 	private bool bIsGrounded = false;
 	
 	void Start()
@@ -97,8 +95,6 @@ public class BuildingObject : UsableObject
 		// If the usable object currently does not have a user
 		else
 		{
-			mouseWheelValue = 0f;
-			
 			if (!bHasBeenPlaced)
 				bHasBeenPlaced = true;
 	
@@ -121,8 +117,6 @@ public class BuildingObject : UsableObject
 					if (!rBody.isKinematic)
 						rBody.isKinematic = true;
 				}
-				
-				//Debug.Log(this.gameObject + " is now kinematic");
 			}
 		}
 	}
@@ -133,56 +127,20 @@ public class BuildingObject : UsableObject
 		float desiredDistance = HoldingDistance;
 		float playerHeight = User.transform.position.y * 0.5f;
 		
-		if (!User.IsTopDownPlayer)
-		{
-			// Calculate a 2D vector at the middle of the screen
-			Vector2 midScreen = new Vector2(Screen.width/2, Screen.height/2);
+		Vector2 midScreen = new Vector2(Screen.width/2, Screen.height/2);
 
-			// Find the distance from the user to his camera, in order to make the vector longer in non-1st person perspective
-			float distanceMultiplier = (User.transform.position - User.PlayerCamera.transform.position).magnitude;
-			desiredDistance += distanceMultiplier;
+		targetPos = new Vector3(midScreen.x, midScreen.y, desiredDistance);
+		targetPos = User.PlayerCamera.ScreenToWorldPoint(targetPos);
 
-			// Define a 3D vector at the middle of the screen, using the HoldingDistance variable for depth (distance from player pawn)
-			targetPos = new Vector3(midScreen.x, midScreen.y, desiredDistance);
-			targetPos = User.PlayerCamera.ScreenToWorldPoint(targetPos);
-		}
-		else
-		{
-			Ray mouseRay = User.PlayerCamera.ScreenPointToRay(Input.mousePosition);
-			RaycastHit[] mouseHits = Physics.RaycastAll(mouseRay.origin, mouseRay.direction, User.PlayerCamera.farClipPlane);
-			
-			foreach (RaycastHit mouseHit in mouseHits)
-			{
-				if (mouseHit.collider.GetType() == typeof(TerrainCollider))
-				{
-					targetPos = mouseHit.point;
-					targetPos.y = 1f;
-					break;
-				}
-			}
-			
-			mouseWheelValue += Input.GetAxis("Mouse ScrollWheel");
-			mouseWheelValue = Mathf.Clamp(mouseWheelValue, 0f, playerHeight);
-		}
 		float minimumHeight = Terrain.activeTerrain.SampleHeight(targetPos) + this.renderer.bounds.extents.y;
 		float maximumHeight = minimumHeight + playerHeight;	
-		
-		if (User.IsTopDownPlayer)
-		{
-			float yPos = minimumHeight + mouseWheelValue;
-			targetPos.y = yPos;
-		}
-		
-		targetPos = User.transform.InverseTransformPoint(targetPos);
-
-		targetPos.z = Mathf.Clamp(targetPos.z, -desiredDistance, desiredDistance);
-		targetPos.x = Mathf.Clamp(targetPos.x, -desiredDistance, desiredDistance);
-
-		targetPos = User.transform.TransformPoint(targetPos);
-			
 		targetPos.y = Mathf.Clamp(targetPos.y, minimumHeight, maximumHeight);
 		
-		// Set this building object's transform at the specified vector above, after converting the vector to real in-game 3D positions
+		targetPos = User.transform.InverseTransformPoint(targetPos);
+		targetPos.z = Mathf.Clamp(targetPos.z, -desiredDistance, desiredDistance);
+		targetPos.x = Mathf.Clamp(targetPos.x, -desiredDistance, desiredDistance);
+		targetPos = User.transform.TransformPoint(targetPos);
+		
 		this.transform.position = targetPos;
 	}
 
@@ -191,7 +149,6 @@ public class BuildingObject : UsableObject
 		// If the rotation vector has been set by player controller
 		if (RotationVector != Vector3.zero)
 		{
-			//this.transform.Rotate(RotationVector, RotationSpeed);
 			this.transform.RotateAround(this.transform.position, RotationVector, RotationSpeed);
 		}
 	}
@@ -234,7 +191,6 @@ public class BuildingObject : UsableObject
 	{
 		if (IsColliding())
 		{
-			//Debug.Log ("Colliding");
 			ChangeAllMaterialColors(Color.red);
 
 			if (bCanBePlaced)
@@ -281,7 +237,6 @@ public class BuildingObject : UsableObject
 	{
 		if (other.collider.GetType() != typeof(TerrainCollider) && other.gameObject.name != "BuildZoneVolume")
 		{
-			//Debug.Log ("Triggering with " + other);
 			collisions++;
 		}
 	}
@@ -290,14 +245,12 @@ public class BuildingObject : UsableObject
 	{
 		if (other.collider.GetType() != typeof(TerrainCollider) && other.gameObject.name != "BuildZoneVolume")
 		{
-			//Debug.Log ("No longer triggering with " + other);
 			collisions--;
 		}
 	}
 
 	private bool IsColliding()
 	{
-		//Debug.Log ("Collision count: " + collisions);
 		return collisions > 0;
 	}
 	
