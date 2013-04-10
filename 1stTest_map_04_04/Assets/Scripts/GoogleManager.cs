@@ -104,6 +104,31 @@ public class GoogleManager
 		}
 	}
 	
+	public string GetCellValue(int row, int column)
+	{
+		try
+		{
+			CellQuery cellQuery = new CellQuery(worksheet.CellFeedLink);
+			cellQuery.MinimumRow = (uint)row;
+			cellQuery.MaximumRow = (uint)row;
+			cellQuery.MinimumColumn = (uint)column;
+			cellQuery.MaximumColumn = (uint)column;
+			CellFeed cellFeed = service.Query(cellQuery);
+			
+			foreach (CellEntry cell in cellFeed.Entries)
+			{
+				return cell.Value.ToString();	
+			}
+			
+		}
+		catch (WebException e)
+		{
+			Debug.LogWarning("GetCellValue Exception: " + e);	
+		}
+		
+		return "";
+	}
+	
 	public void WriteListToRow(KeyValueList rowToAdd)
 	{
 		try
@@ -130,5 +155,29 @@ public class GoogleManager
 			Debug.LogWarning("WriteListToCell Exception: " + e);
 		}
 	}
+	
+	public void WriteListToRow(string key, string value)
+	{
+		try
+		{		
+			AtomLink listFeedLink = worksheet.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null);
+	
+			ListQuery listQuery = new ListQuery(listFeedLink.HRef.ToString());
+			ListFeed listFeed = service.Query(listQuery);		
+			
+			ListEntry row = new ListEntry();
+			row.Elements.Add(new ListEntry.Custom() { LocalName = key, Value = value } );			
+			
+			service.Insert(listFeed, row);
+		}
+		catch (WebException e)
+		{
+			Debug.LogWarning("WriteListToCell WebException: " + e);
+		}
+		catch (Exception e)
+		{
+			Debug.LogWarning("WriteListToCell Exception: " + e);
+		}
+	}	
 }
 

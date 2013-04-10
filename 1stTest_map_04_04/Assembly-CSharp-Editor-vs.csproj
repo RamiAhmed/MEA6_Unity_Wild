@@ -52,6 +52,21 @@
  <Reference Include="Assembly-UnityScript-firstpass">
  <HintPath>Library\ScriptAssemblies\Assembly-UnityScript-firstpass.dll</HintPath>
  </Reference>
+ <Reference Include="Google.GData.AccessControl">
+ <HintPath>Assets\Plugins\Google.GData.AccessControl.DLL</HintPath>
+ </Reference>
+ <Reference Include="Google.GData.Client">
+ <HintPath>Assets\Plugins\Google.GData.Client.dll</HintPath>
+ </Reference>
+ <Reference Include="Google.GData.Extensions">
+ <HintPath>Assets\Plugins\Google.GData.Extensions.dll</HintPath>
+ </Reference>
+ <Reference Include="Google.GData.Spreadsheets">
+ <HintPath>Assets\Plugins\Google.GData.Spreadsheets.dll</HintPath>
+ </Reference>
+ <Reference Include="Newtonsoft.Json">
+ <HintPath>Assets\Plugins\Newtonsoft.Json.dll</HintPath>
+ </Reference>
  <Reference Include="UnityEditor.Graphs">
  <HintPath>E:\Unity3D\Editor\Data\Managed\UnityEditor.Graphs.dll</HintPath>
  </Reference>

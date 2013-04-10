@@ -217,6 +217,11 @@ public class PlayerController : MonoBehaviour {
 			GUI.Box(new Rect((Screen.width/2f) - (width/2f), (Screen.height/2f) - (height/2f), width, height), "GAME IS PAUSED");	
 		}
 		
+		else if (currentGameState == GameStateHandler.GameState.QUESTIONNAIRE)
+		{
+			// do nothing, handled by QuestionnaireHandler	
+		}
+		
 		else
 		{
 			HandleMainMenu();
