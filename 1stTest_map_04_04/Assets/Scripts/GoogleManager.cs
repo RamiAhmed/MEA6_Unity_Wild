@@ -10,8 +10,8 @@ using Google.GData.Spreadsheets;
 public class GoogleManager 
 {
 	public string googleDocsAPIProjectName = "Unity Tests Project 1";
-	public string googleUserName = "RamiAhmedBock@gmail.com";
-	public string googlePassword = "u8FDa7d4P0";
+	public string googleUserName = "username";
+	public string googlePassword = "password";
 	public string googleSpreadsheetName = "Unity_Test_1";
 
 	private SpreadsheetsService service;
