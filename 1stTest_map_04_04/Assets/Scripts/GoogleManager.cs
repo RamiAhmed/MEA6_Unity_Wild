@@ -24,24 +24,6 @@ public class GoogleManager
 		InitGoogleConnection();
 	}
 	
-	public GoogleManager(string username, string password)
-	{
-		googleUserName = username;
-		googlePassword = password;
-		
-		InitGoogleConnection();
-	}
-	
-	public GoogleManager(string username, string password, string googleAPIProject, string googleSpreadsheet)
-	{
-		googleUserName = username;
-		googlePassword = password;
-		googleDocsAPIProjectName = googleAPIProject;
-		googleSpreadsheetName = googleSpreadsheet;
-		
-		InitGoogleConnection();
-	}
-	
 	private void InitGoogleConnection()
 	{
 		DumbSecurityCertificatePolicy.Instate();
@@ -77,33 +59,6 @@ public class GoogleManager
 		worksheet = (WorksheetEntry)wsFeed.Entries[0];
 	}
 	
-	public void PrintAllRows()
-	{
-		try
-		{
-			AtomLink listFeedLink = worksheet.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null);
-			
-			ListQuery listQuery = new ListQuery(listFeedLink.HRef.ToString());
-			ListFeed listFeed = service.Query(listQuery);
-			
-			foreach (ListEntry row in listFeed.Entries)
-			{
-				foreach (ListEntry.Custom element in row.Elements)
-				{
-					Debug.Log(element.LocalName + " : " + element.Value);	
-				}
-			}
-		}
-		catch (WebException e)
-		{
-			Debug.LogWarning("PrintAllRows WebException: " + e);
-		}		
-		catch (Exception e)
-		{
-			Debug.LogWarning("PrintAllRows Exception: " + e);	
-		}
-	}
-	
 	public string GetCellValue(int row, int column)
 	{
 		try
@@ -129,7 +84,7 @@ public class GoogleManager
 		return "";
 	}
 	
-	public void WriteListToRow(KeyValueList rowToAdd)
+	public void WriteDictToRow(Dictionary<string,string> dict, bool bUpdateRow)
 	{
 		try
 		{		
@@ -138,46 +93,43 @@ public class GoogleManager
 			ListQuery listQuery = new ListQuery(listFeedLink.HRef.ToString());
 			ListFeed listFeed = service.Query(listQuery);		
 			
-			ListEntry row = new ListEntry();
-			foreach (KeyValuePair<string, string> pair in rowToAdd)
+			if (!bUpdateRow)
 			{
-				row.Elements.Add(new ListEntry.Custom() { LocalName = pair.Key, Value = pair.Value } );			
-			}	
+				ListEntry row = new ListEntry();
+				
+				foreach (KeyValuePair<string, string> pair in dict)
+				{
+					row.Elements.Add(new ListEntry.Custom() { LocalName = pair.Key, Value = pair.Value } );			
+				}	
 			
-			service.Insert(listFeed, row);
+				service.Insert(listFeed, row);
+			}
+			else
+			{
+				ListEntry row = (ListEntry)listFeed.Entries[listFeed.Entries.Count-1];
+				
+				foreach (ListEntry.Custom element in row.Elements)
+				{
+					foreach (KeyValuePair<string, string> pair in dict)
+					{
+						if (element.LocalName == pair.Key)
+						{
+							element.Value = pair.Value;	
+						}
+					}
+				}
+				
+				row.Update();
+			}
 		}
 		catch (WebException e)
 		{
-			Debug.LogWarning("WriteListToCell WebException: " + e);
+			Debug.LogWarning("WriteDictToRow WebException: " + e);
 		}
 		catch (Exception e)
 		{
-			Debug.LogWarning("WriteListToCell Exception: " + e);
-		}
+			Debug.LogWarning("WriteDictToRow Exception: " + e);
+		}			
 	}
-	
-	public void WriteListToRow(string key, string value)
-	{
-		try
-		{		
-			AtomLink listFeedLink = worksheet.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null);
-	
-			ListQuery listQuery = new ListQuery(listFeedLink.HRef.ToString());
-			ListFeed listFeed = service.Query(listQuery);		
-			
-			ListEntry row = new ListEntry();
-			row.Elements.Add(new ListEntry.Custom() { LocalName = key, Value = value } );			
-			
-			service.Insert(listFeed, row);
-		}
-		catch (WebException e)
-		{
-			Debug.LogWarning("WriteListToCell WebException: " + e);
-		}
-		catch (Exception e)
-		{
-			Debug.LogWarning("WriteListToCell Exception: " + e);
-		}
-	}	
 }
 

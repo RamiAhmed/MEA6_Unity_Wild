@@ -13,19 +13,19 @@ public class ScenarioHandler : MonoBehaviour {
 		KEYBOARD
 	};
 	
-	private List<Scenario> availableScenarios = new List<Scenario>();
+	private List<Scenario> availableScenarios;
 	private Scenario currentScenario;
-
-	// Use this for initialization
+	
 	void Start() 
 	{
-		InitScenario();
-		GetNewRandomScenario();
+		availableScenarios = new List<Scenario>();
+		InitScenario();		
+		//GetNewRandomScenario();
 	}
 	
 	void OnGUI()
 	{
-		if (bShowCurrentScenario)
+		if (bShowCurrentScenario && GameStateHandler.GetCurrentGameState() != GameStateHandler.GameState.QUESTIONNAIRE)
 		{
 			float width = 150f, height = 50f;
 			GUI.Box(new Rect(Screen.width - (width + 10f), 5f, width, height), "Scenario: " + currentScenario.ToString());

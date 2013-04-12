@@ -44,6 +44,8 @@ public class PlayerController : MonoBehaviour {
 	
 	private ScenarioHandler scenarioHandler;
 	
+	private Vector3 startPosition = Vector3.zero;
+	
 	/******************************************************
 	 **************** INITIALIZATION **********************
 	 ******************************************************/
@@ -59,6 +61,8 @@ public class PlayerController : MonoBehaviour {
 		mouseLookComponent = this.gameObject.GetComponent<MouseLook>();
 		
 		scenarioHandler = GameObject.Find("ScenarioHandlerBox").GetComponent<ScenarioHandler>();
+		
+		startPosition = this.transform.position;
 	}
 
 	private bool FindCamera(string CameraName)
@@ -107,7 +111,7 @@ public class PlayerController : MonoBehaviour {
 				Time.timeScale = 0f;
 		} 
 		
-		if (currentGameState != GameStateHandler.GameState.END)
+		if (currentGameState != GameStateHandler.GameState.END && currentGameState != GameStateHandler.GameState.QUESTIONNAIRE)
 		{
 			if (Input.GetKeyDown(KeyCode.Pause) || Input.GetKeyDown(KeyCode.P))
 			{
@@ -257,38 +261,31 @@ public class PlayerController : MonoBehaviour {
 				if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Next Scenario", "Progress to the next random scenario. Scenarios left: " + scenarioHandler.GetScenarioCount() + ".")))
 				{
 					RemovePlacedObjects();
-					scenarioHandler.GetNewRandomScenario();
-					GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.PLAY);
+					this.transform.position = startPosition;
+					
+					if (UsedObject != null)
+						ClearObjectReferences(true);
+					
+					GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.QUESTIONNAIRE);
 				}
 				
-				yPos += 55f;
+				//yPos += 55f;
 			}
 			else
 			{						
 				if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Exit Game", "Exit the game.")))
 				{
-					GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.END);
+					GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.QUESTIONNAIRE);
 				}
 				
-				yPos += 55f;
+				//yPos += 55f;
 			}	
 		}
 		
 		else if (currentGameState == GameStateHandler.GameState.END)
 		{	
-			GUI.Box(new Rect(0f, yPos, width, 40f), "Are you sure you want to exit?");
-			
-			yPos += 45f;
-			if (GUI.Button(new Rect(0f, yPos, width/2f, 50f), new GUIContent("Yes", "Click this button if you're sure you want to exit the game.")))
-			{
-				Debug.Log("Shutting down");
-				Application.Quit();
-			}
-			
-			if (GUI.Button(new Rect(width/2f, yPos, width/2f, 50f), new GUIContent("No", "Click this button if you want to go back to the main menu.")))
-			{
-				GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.MAIN_MENU);
-			}
+			Debug.Log("Shutting down");
+			Application.Quit();			
 		}	
 		
 		if (GUI.tooltip != "")

@@ -12,7 +12,7 @@ public class GameStateHandler  {
 		END
 	};
 	
-	private static GameState currentGameState = GameState.MAIN_MENU;
+	private static GameState currentGameState = GameState.QUESTIONNAIRE;
 	
 	public static GameState GetCurrentGameState()
 	{
