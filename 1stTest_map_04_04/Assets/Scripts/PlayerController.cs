@@ -221,14 +221,15 @@ public class PlayerController : MonoBehaviour {
 			GUI.Box(new Rect((Screen.width/2f) - (width/2f), (Screen.height/2f) - (height/2f), width, height), "GAME IS PAUSED");	
 		}
 		
-		else if (currentGameState == GameStateHandler.GameState.QUESTIONNAIRE)
-		{
-			// do nothing, handled by QuestionnaireHandler	
-		}
-		
-		else
+		else if (currentGameState == GameStateHandler.GameState.MAIN_MENU)
 		{
 			HandleMainMenu();
+		}
+		
+		else if (currentGameState == GameStateHandler.GameState.END)
+		{
+			//Debug.Log("Shutting down");	
+			Application.Quit();
 		}
 	}
 	
@@ -236,65 +237,43 @@ public class PlayerController : MonoBehaviour {
 	{
 		float width = 200f, height = 400f;
 		float x = (Screen.width / 2f) - (width / 2f), y = (Screen.height / 2f) - (height / 2f);		
-		float yPos = 0f;
-		
-		GUI.BeginGroup(new Rect(x, y, width, height));
-		
-		GUI.Box(new Rect(0f, yPos, width, 40f), "Main Menu");		
-		yPos += 45f;
-		
-		GameStateHandler.GameState currentGameState = GameStateHandler.GetCurrentGameState();
-		
-		if (currentGameState == GameStateHandler.GameState.MAIN_MENU)
-		{			
-			if (!GUI.skin.box.wordWrap)
-				GUI.skin.box.wordWrap = true;			
+
+		GUILayout.BeginArea(new Rect(x, y, width, height));
+		GUILayout.BeginVertical();
 			
-			if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Resume Game", "Resume the game.")))
-			{
-				GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.PLAY);	
-			}
+		GUILayout.Box("Main Menu");
 				
-			yPos += 55f;
-			if (scenarioHandler.GetScenarioCount() > 0)
-			{	
-				if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Next Scenario", "Progress to the next random scenario. Scenarios left: " + scenarioHandler.GetScenarioCount() + ".")))
-				{
-					RemovePlacedObjects();
-					this.transform.position = startPosition;
-					
-					if (UsedObject != null)
-						ClearObjectReferences(true);
-					
-					GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.QUESTIONNAIRE);
-				}
-				
-				//yPos += 55f;
-			}
-			else
-			{						
-				if (GUI.Button(new Rect(0f, yPos, width, 50f), new GUIContent("Exit Game", "Exit the game.")))
-				{
-					GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.QUESTIONNAIRE);
-				}
-				
-				//yPos += 55f;
-			}	
-		}
+		if (!GUI.skin.box.wordWrap)
+			GUI.skin.box.wordWrap = true;			
 		
-		else if (currentGameState == GameStateHandler.GameState.END)
-		{	
-			Debug.Log("Shutting down");
-			Application.Quit();			
-		}	
-		
-		if (GUI.tooltip != "")
+		if (GUILayout.Button("Resume Game"))
 		{
-			yPos += 55f;
-			GUI.Box(new Rect(5f, yPos, width-5f, 60f), GUI.tooltip);
+			GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.PLAY);	
 		}
-		
-		GUI.EndGroup();
+			
+		if (scenarioHandler.GetScenarioCount() > 0)
+		{	
+			if (GUILayout.Button("Next Scenario"))
+			{
+				RemovePlacedObjects();
+				this.transform.position = startPosition;
+				
+				if (UsedObject != null)
+					ClearObjectReferences(true);
+				
+				GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.QUESTIONNAIRE);
+			}
+		}
+		else
+		{	
+			if (GUILayout.Button("Exit Game"))
+			{
+				GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.QUESTIONNAIRE);
+			}
+		}	
+
+		GUILayout.EndVertical();
+		GUILayout.EndArea();
 	}
 	
 	/******************************************************
@@ -365,6 +344,11 @@ public class PlayerController : MonoBehaviour {
 		if (bIsTimeCounting)
 			elapsedTime += Time.deltaTime;
 	}	
+	
+	public float GetElapsedTime()
+	{
+		return elapsedTime;
+	}
 	
 	/******************************************************
 	 ******* BUILDING OBJECT METHODS FOR UPDATING *********

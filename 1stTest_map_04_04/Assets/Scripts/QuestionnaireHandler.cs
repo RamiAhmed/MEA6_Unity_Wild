@@ -10,16 +10,11 @@ public class QuestionnaireHandler : MonoBehaviour {
 	
 	private Vector3 scrollViewVector = Vector2.zero;
 	
-	private float width = Screen.width * 0.9f,
-				  height = Screen.height-10f;
-	
-	private float qHeight = 40f,
-		 		  qWidth = Screen.width * 0.8f;
-	
 	private int currentPage = 0,
 				lastPage = 1; 
 	
 	private ScenarioHandler scenarioHandlerRef;
+	private PlayerController playerRef;
 	
 	private int age = 0, gender = 0, frequency = 0, amount = 0, experience = 0, preferrence = 0;
 	private string favouriteGame = "";	
@@ -28,12 +23,12 @@ public class QuestionnaireHandler : MonoBehaviour {
 	private string[] wantBuildAnswers;
 	private string[] commentAnswers;
 	
-	private int questionsCount = 0;
-	
 	void Start() 
 	{
 		scenarioHandlerRef = GameObject.Find("ScenarioHandlerBox").GetComponent<ScenarioHandler>();
-		lastPage = scenarioHandlerRef.GetScenarioCount()+2;
+		lastPage = scenarioHandlerRef.GetScenarioCount()+1;
+		
+		playerRef = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
 		
 		answersList = new Dictionary<string,string>();
 		questionsList = new KeyValueList();
@@ -41,6 +36,7 @@ public class QuestionnaireHandler : MonoBehaviour {
 		
 		FindAllQuestions();
 		
+		lastPage++;
 		likertAnswers = new int[lastPage];
 		wantBuildAnswers = new string[lastPage];
 		commentAnswers = new string[lastPage];
@@ -51,6 +47,7 @@ public class QuestionnaireHandler : MonoBehaviour {
 			wantBuildAnswers[i] = "";
 			commentAnswers[i] = "";
 		}
+		lastPage--;
 	}
 	
 	void OnGUI() 
@@ -59,33 +56,32 @@ public class QuestionnaireHandler : MonoBehaviour {
 			return;
 		
 		if (GameStateHandler.GetCurrentGameState() == GameStateHandler.GameState.QUESTIONNAIRE)
-		{			
-			float yPos = 10f;
-				
-			Rect positionRect = new Rect(5f, 5f, width, height),
-				sizeRect = new Rect(0f, 0f, width, (qHeight * questionsList.Count)+10f);
+		{		
+			float width = Screen.width * 0.95f,
+				  height = Screen.height * 0.95f;			
 			
 			if (!GUI.skin.box.wordWrap)
 				GUI.skin.box.wordWrap = true;
 			
-			GUI.BeginGroup(positionRect);
-			scrollViewVector = GUI.BeginScrollView(positionRect, scrollViewVector, sizeRect); 
+			GUILayout.BeginArea(new Rect(5f, 5f, width, height));
+			GUILayout.BeginVertical();
+			scrollViewVector = GUILayout.BeginScrollView(scrollViewVector);
 			
 			foreach (KeyValuePair<string,string> pair in questionsList)
 			{
 				if (currentPage == 0)
-					yPos = BuildDemographics(pair, yPos);
-				else if (currentPage < lastPage-1)
-					yPos = BuildDuring(pair, yPos);
+					BuildDemographics(pair);
+				else if (currentPage < lastPage)
+					BuildDuring(pair);
 				else
-					yPos = BuildAfter(pair, yPos);
+					BuildAfter(pair);
 			}
 			
 			if (GetQuestionsAnswered())
 			{
-				if (currentPage < lastPage-1)
+				if (currentPage < lastPage)
 				{
-					if (GUI.Button(new Rect(qWidth-200f, height-75f, 150f, 50f), "Continue"))
+					if (GUILayout.Button("Continue"))
 					{
 						if (currentPage == 0)
 						{
@@ -103,20 +99,17 @@ public class QuestionnaireHandler : MonoBehaviour {
 				}
 				else
 				{
-					float exitBtnY = height-75f;
-					if (exitBtnY > yPos)
-						exitBtnY = yPos;
-					if (GUI.Button(new Rect(qWidth-200f, exitBtnY, 150f, 50f), "Exit Game"))
+					if (GUILayout.Button("Exit Game"))
 					{
 						SubmitAllAnswers(true);
 						GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.END);
 					}
 				}
 			}
-			GUI.EndScrollView();
-			GUI.EndGroup();
 			
-			questionsCount = 0;
+			GUILayout.EndScrollView();
+			GUILayout.EndVertical();
+			GUILayout.EndArea();
 		}
 	}
 	
@@ -125,8 +118,8 @@ public class QuestionnaireHandler : MonoBehaviour {
 		bool bAnswered = true;
 		foreach (KeyValuePair<string,string> answer in answersList)
 		{
-			Debug.Log ("Answer: " + answer.Key + " - " + answer.Value);
-			if (answer.Value == "" || answer.Key == "")
+			//Debug.Log("Answer: " + answer.Key + " - " + answer.Value);
+			if ((answer.Value == "" || answer.Key == "") && !answer.Key.Contains("comment"))
 			{
 				bAnswered = false;
 				break;
@@ -136,160 +129,118 @@ public class QuestionnaireHandler : MonoBehaviour {
 		return bAnswered;
 	}
 	
-	private float BuildAfter(KeyValuePair<string,string> pair, float yPos)
+	private void BuildAfter(KeyValuePair<string,string> pair)
 	{
-		yPos = BuildDuring(pair, yPos);
+		BuildDuring(pair);
 		
 		if (pair.Key == "preferrence")
 		{
 			string[] preferrenceOptions = {"Mouse", "Keyboard"};
 			
-			preferrence = AddMultipleChoice(preferrenceOptions, pair.Value, pair.Key, preferrence, yPos);
-			
-			yPos += qHeight * 2.1f;
+			preferrence = AddMultipleChoice(preferrenceOptions, pair.Value, pair.Key, preferrence);
 		}
-		
-		return yPos;
 	}
 	
-	private float BuildDuring(KeyValuePair<string,string> pair, float yPos)
+	private void BuildDuring(KeyValuePair<string,string> pair)
 	{
 		if (pair.Key == "likert" + currentPage.ToString())
 		{
-			likertAnswers[currentPage] = AddLikertScale(pair.Value, pair.Key, likertAnswers[currentPage], yPos);
-			
-			yPos += qHeight * 2.1f;
+			likertAnswers[currentPage] = AddLikertScale(pair.Value, pair.Key, likertAnswers[currentPage]);
 		}
 		
 		if (pair.Key == "wantbuild" + currentPage.ToString())
 		{
-			wantBuildAnswers[currentPage] = AddEssay(wantBuildAnswers[currentPage], pair.Value, pair.Key, yPos);
-			
-			yPos += qHeight * 2.1f;
+			wantBuildAnswers[currentPage] = AddEssay(wantBuildAnswers[currentPage], pair.Value, pair.Key);
 		}
 		
 		if (pair.Key == "comments" + currentPage.ToString())
 		{
-			commentAnswers[currentPage] = AddEssay(commentAnswers[currentPage], pair.Value, pair.Key, yPos);
-			
-			yPos += qHeight * 2.1f;
+			commentAnswers[currentPage] = AddEssay(commentAnswers[currentPage], pair.Value, pair.Key);
 		}
-		
-		return yPos;
 	}
 	
-	private float BuildDemographics(KeyValuePair<string,string> pair, float yPos)
+	private void BuildDemographics(KeyValuePair<string,string> pair)
 	{
 		if (pair.Key == "age")
 		{
 			string[] ageIntervals = {"14 or less", "15-19", "20-24", "25-29", "30 or more"};
 			
-			age = AddMultipleChoice(ageIntervals, pair.Value, pair.Key, age, yPos);
-
-			yPos += qHeight * 2.1f;
+			age = AddMultipleChoice(ageIntervals, pair.Value, pair.Key, age);
 		}
 		
 		if (pair.Key == "gender")
 		{
 			string[] genders = {"Male", "Female"};
 			
-			gender = AddMultipleChoice(genders, pair.Value, pair.Key, gender, yPos);
-
-			yPos += qHeight * 2.1f;
+			gender = AddMultipleChoice(genders, pair.Value, pair.Key, gender);
 		}
 		
 		if (pair.Key == "freqplaying")
 		{
 			string[] freqIntervals = {"Once per year or less", "More than once per month", "More than once per week", "More than once per day"};
 		
-			frequency = AddMultipleChoice(freqIntervals, pair.Value, pair.Key, frequency, yPos);
-			
-			yPos += qHeight * 2.1f;
+			frequency = AddMultipleChoice(freqIntervals, pair.Value, pair.Key, frequency);
 		}
 		
 		if (pair.Key == "amountplaying")
 		{
 			string[] amountIntervals = {"Less than 1 hour", "More than 1 hour", "More than 2 hours", "More than 4 hours", "More than 6 hours", "More than 8 hours"};
 			
-			amount = AddMultipleChoice(amountIntervals, pair.Value, pair.Key, amount, yPos);
-			
-			yPos += qHeight * 2.1f;
+			amount = AddMultipleChoice(amountIntervals, pair.Value, pair.Key, amount);
 		}
 		
 		if (pair.Key == "favourite")
 		{	
-			favouriteGame = AddEssay(favouriteGame, pair.Value, pair.Key, yPos);
-
-			yPos += qHeight * 2.1f;
+			favouriteGame = AddEssay(favouriteGame, pair.Value, pair.Key);
 		}
 		
 		if (pair.Key == "likert0")
 		{
-			experience = AddLikertScale(pair.Value, pair.Key, experience, yPos);
-			
-			yPos += qHeight * 2.1f;
+			experience = AddLikertScale(pair.Value, pair.Key, experience);
 		}
-		
-		return yPos;
 	}
 	
-	private int AddLikertScale(string question, string key, int toolbarSelection, float yPos)
+	private int AddLikertScale(string question, string key, int toolbarSelection)
 	{
 		string[] likertChoices = {"-3", "-2", "-1", "0", "+1", "+2", "+3"};
 		
-		toolbarSelection = AddMultipleChoice(likertChoices, question, key, toolbarSelection, yPos);
+		toolbarSelection = AddMultipleChoice(likertChoices, question, key, toolbarSelection);
 		
 		return toolbarSelection;
 	}
 	
-	private string AddEssay(string text, string question, string key, float yPos) 
+	private string AddEssay(string text, string question, string key) 
 	{
-		GUI.BeginGroup(new Rect(0f, yPos, width, qHeight*2f));
+		GUILayout.Box(question);
 		
-		GUI.Box(new Rect(5f, 5f, qWidth, qHeight-10f), question);
-		
-		text = GUI.TextArea(new Rect(5, qHeight-5f, qWidth, qHeight), text);
-			
-		GUI.EndGroup();	
+		text = GUILayout.TextArea(text);
 		
 		AddOrReplaceToDict(answersList, key, text);
-		questionsCount++;
 		
 		return text;
 	}
 	
-	private int AddMultipleChoice(string[] toolbarOptions, string question, string key, int toolbarSelection, float yPos)
+	private int AddMultipleChoice(string[] toolbarOptions, string question, string key, int toolbarSelection)
 	{
-		GUI.BeginGroup(new Rect(0f, yPos, width, qHeight*2f));
+		GUILayout.Box(question);
 		
-		GUI.Box(new Rect(5f, 5f, qWidth, qHeight-10f), question);
+		toolbarSelection = GUILayout.Toolbar(toolbarSelection, toolbarOptions);
 		
-		toolbarSelection = GUI.Toolbar(new Rect(5f, qHeight-5f, qWidth, qHeight), toolbarSelection, toolbarOptions);
-			
-		GUI.EndGroup();
+		AddOrReplaceToDict(answersList, key, toolbarOptions[toolbarSelection]);		
 		
-		if (GUI.changed)
-			AddOrReplaceToDict(answersList, key, toolbarOptions[toolbarSelection]);		
-		
-		questionsCount++;
 		return toolbarSelection;
-	}
-	
-	private void AddOrReplaceToDict(Dictionary<string,string> dict, string key, string value)
-	{
-		if (dict.ContainsKey(key))
-			dict[key] = value;
-		else
-			dict.Add(key, value);
 	}
 	
 	private void SubmitAllAnswers(bool bUpdateRow)
 	{
-		string now = System.DateTime.Now.ToShortDateString() + " " + System.DateTime.Now.ToString("HH:mm:ss");
+		string now = System.DateTime.Now.ToString("dd.MM.yyyy") + " " + System.DateTime.Now.ToString("HH:mm:ss");
 		AddOrReplaceToDict(answersList, "timestamp" + currentPage.ToString(), now);
 		
 		string scenario = scenarioHandlerRef.GetCurrentScenario().ToString();
 		AddOrReplaceToDict(answersList, "scenario" + currentPage.ToString(), scenario);
+		
+		string elapsedTime = playerRef.GetElapsedTime().ToString();
+		AddOrReplaceToDict(answersList, "timespent" + currentPage.ToString(), elapsedTime);
 		
 		googleManager.WriteDictToRow(answersList, bUpdateRow);
 		answersList.Clear();
@@ -307,5 +258,12 @@ public class QuestionnaireHandler : MonoBehaviour {
 			cellValue = googleManager.GetCellValue(row, column);
 		}
 	}
-
+	
+	private void AddOrReplaceToDict(Dictionary<string,string> dict, string key, string value)
+	{
+		if (dict.ContainsKey(key))
+			dict[key] = value;
+		else
+			dict.Add(key, value);
+	}	
 }
