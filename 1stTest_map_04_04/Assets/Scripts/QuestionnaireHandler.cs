@@ -5,10 +5,8 @@ using System.Collections.Generic;
 public class QuestionnaireHandler : MonoBehaviour {
 	
 	private GoogleManager googleManager = null;
-	private KeyValueList questionsList;
+	private Dictionary<string,string> questionsList;
 	private Dictionary<string,string> answersList;
-	
-	private Vector3 scrollViewVector = Vector2.zero;
 	
 	private int currentPage = 0,
 				lastPage = 1; 
@@ -23,18 +21,22 @@ public class QuestionnaireHandler : MonoBehaviour {
 	private string[] wantBuildAnswers;
 	private string[] commentAnswers;
 	
+	private GUIStyle windowStyle = new GUIStyle();
+	private Rect questionnaireRect;
+	private float qWidth = 600, qHeight = 400;
+	
 	void Start() 
 	{
-		scenarioHandlerRef = GameObject.Find("ScenarioHandlerBox").GetComponent<ScenarioHandler>();
-		lastPage = scenarioHandlerRef.GetScenarioCount()+1;
-		
+		googleManager = this.GetComponent<GoogleManager>();
+		scenarioHandlerRef = this.GetComponent<ScenarioHandler>();
 		playerRef = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
 		
 		answersList = new Dictionary<string,string>();
-		questionsList = new KeyValueList();
-		googleManager = new GoogleManager();
+		questionsList = new Dictionary<string,string>();
 		
 		FindAllQuestions();
+
+		lastPage = scenarioHandlerRef.GetScenarioCount()+1;		
 		
 		lastPage++;
 		likertAnswers = new int[lastPage];
@@ -48,6 +50,15 @@ public class QuestionnaireHandler : MonoBehaviour {
 			commentAnswers[i] = "";
 		}
 		lastPage--;
+		
+		float screenWidth = Screen.width * 0.95f,
+			screenHeight = Screen.height * 0.95f;
+		qWidth = (screenWidth > qWidth) ? screenWidth : qWidth;
+		qHeight = (screenHeight > qHeight) ? screenHeight : qHeight;		
+		
+		questionnaireRect = new Rect(5f, 5f, qWidth, qHeight);
+		
+		windowStyle.normal.background = MakeColorTexture((int)qWidth+1, (int)qHeight+1, new Color(0.1f, 0.1f, 0.1f, 0.9f));
 	}
 	
 	void OnGUI() 
@@ -57,60 +68,63 @@ public class QuestionnaireHandler : MonoBehaviour {
 		
 		if (GameStateHandler.GetCurrentGameState() == GameStateHandler.GameState.QUESTIONNAIRE)
 		{		
-			float width = Screen.width * 0.95f,
-				  height = Screen.height * 0.95f;			
+			questionnaireRect = GUILayout.Window(0, questionnaireRect, DrawQuestionnaire, "", windowStyle);
+		}
+	}
+	
+	void DrawQuestionnaire(int windowID)
+	{
+		if (!GUI.skin.box.wordWrap)
+			GUI.skin.box.wordWrap = true;
+		
+		GUILayout.BeginVertical(windowStyle);
+		
+		GUILayout.Box("Questionnaire");
+		GUILayout.Space(10);		
+		
+		foreach (KeyValuePair<string,string> pair in questionsList)
+		{
+			if (currentPage == 0)
+				BuildDemographics(pair);
+			else if (currentPage < lastPage)
+				BuildDuring(pair);
+			else
+				BuildAfter(pair);
+		}
+		
+		if (GetQuestionsAnswered())
+		{
+			GUILayout.Space(25);
 			
-			if (!GUI.skin.box.wordWrap)
-				GUI.skin.box.wordWrap = true;
-			
-			GUILayout.BeginArea(new Rect(5f, 5f, width, height));
-			GUILayout.BeginVertical();
-			scrollViewVector = GUILayout.BeginScrollView(scrollViewVector);
-			
-			foreach (KeyValuePair<string,string> pair in questionsList)
+			if (currentPage < lastPage)
 			{
-				if (currentPage == 0)
-					BuildDemographics(pair);
-				else if (currentPage < lastPage)
-					BuildDuring(pair);
-				else
-					BuildAfter(pair);
-			}
-			
-			if (GetQuestionsAnswered())
-			{
-				if (currentPage < lastPage)
+				if (GUILayout.Button("Continue", GUILayout.Height(40)))
 				{
-					if (GUILayout.Button("Continue"))
+					if (currentPage == 0)
 					{
-						if (currentPage == 0)
-						{
-							SubmitAllAnswers(false);
-						}
-						else
-						{
-							SubmitAllAnswers(true);
-							scenarioHandlerRef.GetNewRandomScenario();
-							GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.PLAY);
-						}
-						
-						currentPage++;
+						SubmitAllAnswers(false);
 					}
-				}
-				else
-				{
-					if (GUILayout.Button("Exit Game"))
+					else
 					{
 						SubmitAllAnswers(true);
-						GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.END);
+						scenarioHandlerRef.GetNewRandomScenario();
+						GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.PLAY);
 					}
+					
+					currentPage++;
 				}
 			}
-			
-			GUILayout.EndScrollView();
-			GUILayout.EndVertical();
-			GUILayout.EndArea();
+			else
+			{
+				if (GUILayout.Button("Exit Game", GUILayout.Height(40)))
+				{
+					SubmitAllAnswers(true);
+					GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.END);
+				}
+			}
 		}
+		
+		GUILayout.EndVertical();	
 	}
 	
 	private bool GetQuestionsAnswered()
@@ -135,7 +149,7 @@ public class QuestionnaireHandler : MonoBehaviour {
 		
 		if (pair.Key == "preferrence")
 		{
-			string[] preferrenceOptions = {"Mouse", "Keyboard"};
+			string[] preferrenceOptions = {"Mouse", "Keyboard"}; // update with scenarios
 			
 			preferrence = AddMultipleChoice(preferrenceOptions, pair.Value, pair.Key, preferrence);
 		}
@@ -266,4 +280,18 @@ public class QuestionnaireHandler : MonoBehaviour {
 		else
 			dict.Add(key, value);
 	}	
+	
+	private Texture2D MakeColorTexture(int width, int height, Color col)
+    {
+        Color[] pix = new Color[width*height];
+
+        for(int i = 0; i < pix.Length; i++)
+            pix[i] = col;
+
+        Texture2D result = new Texture2D(width, height);
+        result.SetPixels(pix);
+        result.Apply();
+
+        return result;
+    }
 }

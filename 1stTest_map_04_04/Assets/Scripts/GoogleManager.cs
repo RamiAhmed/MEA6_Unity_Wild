@@ -7,21 +7,22 @@ using System.Collections.Generic;
 using Google.GData.Client;
 using Google.GData.Spreadsheets;
 
-public class GoogleManager 
+public class GoogleManager : MonoBehaviour
 {
-	public string googleDocsAPIProjectName = "Unity Tests Project 1";
 	public string googleUserName = "username";
-	public string googlePassword = "password";
-	public string googleSpreadsheetName = "Unity_Test_1";
+	public string googlePassword = "password";	
+	
+	// should probably be public at some point
+	private string googleDocsAPIProjectName = "Unity Tests Project 1";
+	private string googleSpreadsheetName = "Unity_Test_1";
 
 	private SpreadsheetsService service;
 	private SpreadsheetEntry sheet;
 	private WorksheetEntry worksheet;	
 	
-	// Use this for initialization
-	public GoogleManager()
+	void Start()
 	{
-		InitGoogleConnection();
+		InitGoogleConnection();	
 	}
 	
 	private void InitGoogleConnection()

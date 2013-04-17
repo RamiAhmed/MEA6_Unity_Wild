@@ -143,6 +143,8 @@ public class PlayerController : MonoBehaviour {
 			return;
 		}		
 		
+		CheckPlayerPosition();
+		
 		// make sure time goes on
 		TimeCounting();	
 		
@@ -178,6 +180,11 @@ public class PlayerController : MonoBehaviour {
 			{
 				ClearObjectReferences(true);		
 			}
+		}
+		
+		else if (Input.GetKey(KeyCode.Comma))
+		{
+			this.transform.position = startPosition;	
 		}
 
 		else
@@ -228,8 +235,10 @@ public class PlayerController : MonoBehaviour {
 		
 		else if (currentGameState == GameStateHandler.GameState.END)
 		{
-			//Debug.Log("Shutting down");	
-			Application.Quit();
+			if (Application.isEditor)
+				GUI.Box(new Rect(Screen.width/2f - 100, Screen.height/2f - 25, 200, 50), "GAME OVER");
+			else
+				Application.Quit();
 		}
 	}
 	
@@ -279,6 +288,16 @@ public class PlayerController : MonoBehaviour {
 	/******************************************************
 	 **************** HELPER METHODS **********************
 	 ******************************************************/
+	
+	private void CheckPlayerPosition()
+	{
+		float allowedDistance = 100f;
+		
+		if ((this.transform.position - startPosition).sqrMagnitude > (allowedDistance * allowedDistance))
+		{
+			this.transform.position = startPosition;	
+		}
+	}
 	
 	private void SortAfterDistance(RaycastHit[] array, Vector3 compareTo)
 	{
