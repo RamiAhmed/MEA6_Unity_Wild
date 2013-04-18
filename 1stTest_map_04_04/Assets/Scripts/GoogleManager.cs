@@ -20,7 +20,7 @@ public class GoogleManager : MonoBehaviour
 	private SpreadsheetEntry sheet;
 	private WorksheetEntry worksheet;	
 	
-	void Start()
+	void Awake()
 	{
 		InitGoogleConnection();	
 	}
@@ -43,7 +43,7 @@ public class GoogleManager : MonoBehaviour
 	{
 		SpreadsheetQuery query = new SpreadsheetQuery();
 		SpreadsheetFeed feed = service.Query(query);
-		
+
 		if (feed.Entries.Count <= 0)
 			Debug.LogWarning("No spreadsheets found");
 		
@@ -55,9 +55,12 @@ public class GoogleManager : MonoBehaviour
 				break;
 			}
 		}
-		
+
 		WorksheetFeed wsFeed = sheet.Worksheets;
 		worksheet = (WorksheetEntry)wsFeed.Entries[0];
+		
+		if (wsFeed.Entries.Count <= 0)
+			Debug.LogWarning("No sheets in spreadsheet found");
 	}
 	
 	public string GetCellValue(int row, int column)
@@ -78,6 +81,10 @@ public class GoogleManager : MonoBehaviour
 			
 		}
 		catch (WebException e)
+		{
+			Debug.LogWarning("GetCellValue WebException: " + e);	
+		}
+		catch (Exception e)
 		{
 			Debug.LogWarning("GetCellValue Exception: " + e);	
 		}

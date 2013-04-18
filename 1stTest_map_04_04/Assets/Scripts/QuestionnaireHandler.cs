@@ -6,6 +6,7 @@ public class QuestionnaireHandler : MonoBehaviour {
 	
 	private GoogleManager googleManager = null;
 	private Dictionary<string,string> questionsList;
+	private Dictionary<string,string> helperTextList;
 	private Dictionary<string,string> answersList;
 	
 	private int currentPage = 0,
@@ -33,6 +34,7 @@ public class QuestionnaireHandler : MonoBehaviour {
 		
 		answersList = new Dictionary<string,string>();
 		questionsList = new Dictionary<string,string>();
+		helperTextList = new Dictionary<string, string>();
 		
 		FindAllQuestions();
 
@@ -79,8 +81,7 @@ public class QuestionnaireHandler : MonoBehaviour {
 		
 		GUILayout.BeginVertical(windowStyle);
 		
-		GUILayout.Box("Questionnaire");
-		GUILayout.Space(10);		
+		GUILayout.Box("Questionnaire");		
 		
 		foreach (KeyValuePair<string,string> pair in questionsList)
 		{
@@ -94,7 +95,7 @@ public class QuestionnaireHandler : MonoBehaviour {
 		
 		if (GetQuestionsAnswered())
 		{
-			GUILayout.Space(25);
+			GUILayout.FlexibleSpace();
 			
 			if (currentPage < lastPage)
 			{
@@ -225,22 +226,36 @@ public class QuestionnaireHandler : MonoBehaviour {
 	
 	private string AddEssay(string text, string question, string key) 
 	{
-		GUILayout.Box(question);
+		if (helperTextList.ContainsKey(key))
+		{
+			question += "\n" + helperTextList[key];
+		}		
 		
-		text = GUILayout.TextArea(text);
+		GUILayout.Box(question);			
+		
+		text = GUILayout.TextArea(text, GUILayout.Height(40));
 		
 		AddOrReplaceToDict(answersList, key, text);
+		
+		GUILayout.Space(15);
 		
 		return text;
 	}
 	
 	private int AddMultipleChoice(string[] toolbarOptions, string question, string key, int toolbarSelection)
 	{
+		if (helperTextList.ContainsKey(key))
+		{	
+			question += "\n" + helperTextList[key];
+		}	
+		
 		GUILayout.Box(question);
 		
 		toolbarSelection = GUILayout.Toolbar(toolbarSelection, toolbarOptions);
 		
-		AddOrReplaceToDict(answersList, key, toolbarOptions[toolbarSelection]);		
+		AddOrReplaceToDict(answersList, key, toolbarOptions[toolbarSelection]);	
+		
+		GUILayout.Space(15);
 		
 		return toolbarSelection;
 	}
@@ -266,7 +281,12 @@ public class QuestionnaireHandler : MonoBehaviour {
 		string cellValue = googleManager.GetCellValue(row, column);
 		while (cellValue != "")
 		{
-			questionsList.Add(googleManager.GetCellValue(row-1, column), cellValue);
+			string key = googleManager.GetCellValue(row-1, column);
+			questionsList.Add(key, cellValue);
+			
+			string helperText = googleManager.GetCellValue(row+1, column);
+			if (helperText != "")
+				helperTextList.Add(key, helperText);
 			
 			column++;			
 			cellValue = googleManager.GetCellValue(row, column);
