@@ -54,13 +54,13 @@ public class QuestionnaireHandler : MonoBehaviour {
 		lastPage--;
 		
 		float screenWidth = Screen.width * 0.95f,
-			screenHeight = Screen.height * 0.95f;
+			screenHeight = Screen.height * 0.90f;
 		qWidth = (screenWidth > qWidth) ? screenWidth : qWidth;
 		qHeight = (screenHeight > qHeight) ? screenHeight : qHeight;		
 		
-		questionnaireRect = new Rect(5f, 5f, qWidth, qHeight);
+		questionnaireRect = new Rect((Screen.width/2f) - (qWidth/2f), (Screen.height/2f) - (qHeight/2f), qWidth, qHeight);
 		
-		windowStyle.normal.background = MakeColorTexture((int)qWidth+1, (int)qHeight+1, new Color(0.1f, 0.1f, 0.1f, 0.9f));
+		windowStyle.normal.background = MakeColorTexture((int)qWidth+1, (int)qHeight+1, Color.black);
 	}
 	
 	void OnGUI() 
@@ -74,6 +74,8 @@ public class QuestionnaireHandler : MonoBehaviour {
 		if (GameStateHandler.GetCurrentGameState() == GameStateHandler.GameState.QUESTIONNAIRE)
 		{		
 			questionnaireRect = GUILayout.Window(0, questionnaireRect, DrawQuestionnaire, "", windowStyle);
+			
+			GUI.BringWindowToFront(0);
 		}
 	}
 	

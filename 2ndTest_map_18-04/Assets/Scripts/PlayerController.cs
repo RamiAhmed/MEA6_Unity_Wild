@@ -73,7 +73,7 @@ public class PlayerController : MonoBehaviour {
 		try
 		{
 			PlayerCamera = this.transform.FindChild(CameraName).camera;
-			Debug.Log("Found the player's camera successfully");
+			//Debug.Log("Found the player's camera successfully");
 			success = true;
 		}
 		catch (NullReferenceException e)
@@ -94,7 +94,9 @@ public class PlayerController : MonoBehaviour {
 		GameStateHandler.GameState currentGameState = GameStateHandler.GetCurrentGameState();
 		if (currentGameState == GameStateHandler.GameState.PLAY)
 		{
-			SetPlayerActive(true);
+			if (!Input.GetMouseButton(0))
+				LockMouseCursor();
+			
 			if (Time.timeScale != 1f)
 				Time.timeScale = 1f;
 			
@@ -102,12 +104,7 @@ public class PlayerController : MonoBehaviour {
 		}
 		else
 		{
-			SetPlayerActive(false);	
-			
-			if (Screen.lockCursor)
-			{
-				Screen.lockCursor = false;
-			}	
+			UnlockMouseCursor();			
 			
 			if (Time.timeScale != 0f)
 				Time.timeScale = 0f;
@@ -152,9 +149,6 @@ public class PlayerController : MonoBehaviour {
 		
 		// make sure time goes on
 		TimeCounting();	
-		
-		// disable the mouse cursor unless holding CTRL
-		DisableMouseCursorOnControl();
 
 		// If the player pressed 'E'
 		if (Input.GetKeyDown(KeyCode.E))
@@ -165,10 +159,15 @@ public class PlayerController : MonoBehaviour {
 				// sweep in front of player in search of usable objects
 				SweepTestToUse();
 			}
+			else
+			{
+				PlaceObject();	
+			}
 		}
 			
+		/*
 		// if the player clicked left mouse button
-		else if (Input.GetMouseButtonDown(0))
+		if (Input.GetMouseButtonDown(0))
 		{
 			// if the player is currently using an object
 			if (UsedObject != null)
@@ -177,6 +176,7 @@ public class PlayerController : MonoBehaviour {
 				PlaceObject();
 			}
 		}
+		*/
 		
 		else if (Input.GetKey(KeyCode.Period))
 		{
@@ -367,25 +367,26 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 	
-	private void DisableMouseCursorOnControl()
+	private void UnlockMouseCursor()
 	{
 		if (mouseLookComponent != null)
 		{
-			if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
-			{
-				if (Screen.lockCursor)
-					Screen.lockCursor = false;
-				
-				SetPlayerActive(false);
-			}
-			else
-			{
-				if (!Screen.lockCursor)
-					Screen.lockCursor = true;
-				
-				SetPlayerActive(true);
-			}
-		}		
+			if (Screen.lockCursor)
+				Screen.lockCursor = false;
+			
+			SetPlayerActive(false);
+		}
+	}
+	
+	private void LockMouseCursor()
+	{
+		if (mouseLookComponent != null)
+		{
+			if (!Screen.lockCursor)
+				Screen.lockCursor = true;
+			
+			SetPlayerActive(true);			
+		}
 	}
 
 	private void TimeCounting()
@@ -412,33 +413,21 @@ public class PlayerController : MonoBehaviour {
 			{
 				Vector3 rotationVector = Vector3.zero;
 
-				if (Input.GetKey(KeyCode.Keypad8)) // up on keypad
+				if (scenarioHandler.GetCurrentScenario() == ScenarioHandler.Scenario.KEYBOARD)
 				{
-					rotationVector += this.transform.right;
+					rotationVector = HandleKeyboardRotation();	
 				}
-				else if (Input.GetKey(KeyCode.Keypad2)) // down on keypad
+				else if (scenarioHandler.GetCurrentScenario() == ScenarioHandler.Scenario.MOUSE)
 				{
-					rotationVector += -this.transform.right;
+					rotationVector = HandleMouseRotation();
 				}
-
-				if (Input.GetKey(KeyCode.Keypad7)) // left on keypad
+				else
 				{
-					rotationVector += this.transform.forward;
+					rotationVector = HandleMouseRotation();
+					if (rotationVector == Vector3.zero)
+						rotationVector = HandleKeyboardRotation();	
 				}
-				else if (Input.GetKey(KeyCode.Keypad9)) // right on keypad
-				{
-					rotationVector += -this.transform.forward;
-				}
-
-				if (Input.GetKey(KeyCode.Keypad4))
-				{
-					rotationVector += this.transform.up;
-				}
-				else if (Input.GetKey(KeyCode.Keypad6))
-				{
-					rotationVector += -this.transform.up;
-				}
-
+				
 				bo.RotationVector = rotationVector;
 			}
 			else
@@ -446,6 +435,143 @@ public class PlayerController : MonoBehaviour {
 				Debug.LogWarning(UsedObject + " is not a building object!");
 			}
 		}
+	}
+	
+	private Vector3 HandleMouseRotation()
+	{
+		Vector3 rotationVector = Vector3.zero;
+	
+		if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) 
+		{
+			if (Input.GetMouseButton(0))
+			{
+				rotationVector += this.transform.up;	
+			}
+			else if (Input.GetMouseButton(1))
+			{
+				rotationVector -= this.transform.up;	
+			}				
+		}
+		
+		else if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
+		{
+			if (Input.GetMouseButton(0))
+			{
+				rotationVector += this.transform.forward;	
+			}
+			else if (Input.GetMouseButton(1))
+			{
+				rotationVector -= this.transform.forward;	
+			}				
+		}
+		
+		else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) 	
+		{
+			if (Input.GetMouseButton(0))
+			{
+				rotationVector += this.transform.right;	
+			}
+			else if (Input.GetMouseButton(1))
+			{
+				rotationVector -= this.transform.right;	
+			}				
+		}
+		
+		return rotationVector;
+	}
+	
+	
+	/*
+	private Vector3 HandleMouseRotation()
+	{
+		Vector3 rotationVector = Vector3.zero;
+		
+		if (Input.GetMouseButton(0)) // left mouse click
+		{
+			UnlockMouseCursor();
+			
+			Vector3 mousePos = PlayerCamera.ScreenToWorldPoint(Input.mousePosition);
+			Vector3 relativeMousePos = UsedObject.transform.InverseTransformPoint(mousePos);		
+			
+			if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) // control mapped to up-down
+			{
+				if (relativeMousePos.y > 0f)
+				{
+					Debug.Log("Mouse is above");	
+					rotationVector += this.transform.right;
+				}
+				else if (relativeMousePos.y < 0f)
+				{
+					Debug.Log("Mouse is below");	
+					rotationVector -= this.transform.right;
+				}
+			}
+			
+			else if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt)) // alt mapped to left-right
+			{
+				if (relativeMousePos.x < 0f)
+				{
+					Debug.Log("Mouse is to the left");		
+					rotationVector += this.transform.forward;
+				}
+				else if (relativeMousePos.x > 0f)
+				{
+					Debug.Log("Mouse is to the right");	
+					rotationVector -= this.transform.forward;
+				}
+			}
+			
+			else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) // shift mapped to y-axis
+			{
+				if (relativeMousePos.z < 0f)
+				{
+					Debug.Log("Mouse is closer");	
+					rotationVector += this.transform.up;
+				}
+				else if (relativeMousePos.z > 0f)
+				{
+					Debug.Log("Mouse is further away");	
+					rotationVector -= this.transform.up;
+				}
+			}
+		}
+
+		
+		return rotationVector;
+	}
+	*/
+	
+	private Vector3 HandleKeyboardRotation()
+	{
+		Vector3 rotationVector = Vector3.zero;
+		if (Input.GetKey(KeyCode.Keypad8)) // up on keypad
+		{
+			rotationVector += this.transform.right;
+		}
+		else if (Input.GetKey(KeyCode.Keypad2)) // down on keypad
+		{
+			rotationVector += -this.transform.right;
+		}
+
+		if (Input.GetKey(KeyCode.Keypad7)) // left on keypad
+		{
+			rotationVector += this.transform.forward;
+		}
+		else if (Input.GetKey(KeyCode.Keypad9)) // right on keypad
+		{
+			rotationVector += -this.transform.forward;
+		}
+
+		if (Input.GetKey(KeyCode.Keypad4))
+		{
+			rotationVector += this.transform.up;
+		}
+		else if (Input.GetKey(KeyCode.Keypad6))
+		{
+			rotationVector += -this.transform.up;
+		}
+
+		return rotationVector;		
 	}
 	
 	private void PlaceObject()

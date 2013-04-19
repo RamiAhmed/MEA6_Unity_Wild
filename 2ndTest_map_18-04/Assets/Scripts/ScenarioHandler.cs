@@ -10,7 +10,8 @@ public class ScenarioHandler : MonoBehaviour {
 	public enum Scenario
 	{
 		MOUSE,
-		KEYBOARD
+		KEYBOARD,
+		MIXED
 	};
 	
 	private List<Scenario> availableScenarios;
@@ -20,7 +21,6 @@ public class ScenarioHandler : MonoBehaviour {
 	{
 		availableScenarios = new List<Scenario>();
 		InitScenario();		
-		//GetNewRandomScenario();
 	}
 	
 	void OnGUI()
@@ -46,6 +46,7 @@ public class ScenarioHandler : MonoBehaviour {
 	{
 		availableScenarios.Add(Scenario.MOUSE);
 		availableScenarios.Add(Scenario.KEYBOARD);
+		availableScenarios.Add(Scenario.MIXED);
 	}
 	
 	public void GetNewRandomScenario()
