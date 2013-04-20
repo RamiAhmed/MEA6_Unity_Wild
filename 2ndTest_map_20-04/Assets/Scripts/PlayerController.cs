@@ -17,7 +17,7 @@ using System.Collections.Generic;
 public class PlayerController : MonoBehaviour {
 
 	// UseDistance controls the interaction distance, i.e. within 2 Unity units the player may interact with usable objects
-	public float UseDistance = 2.0f;
+	private float UseDistance = 1f;
 
 	public GameObject[] SpawnableBuildingObjects;
 	
@@ -328,7 +328,7 @@ public class PlayerController : MonoBehaviour {
 		
 		if ((this.transform.position - startPosition).sqrMagnitude > (allowedDistance * allowedDistance))
 		{
-			this.transform.position = startPosition;	
+			this.transform.position = startPosition;
 		}
 	}
 	
@@ -596,55 +596,46 @@ public class PlayerController : MonoBehaviour {
 	/* USING / PICKING UP */
 	
 	private void SweepTestToUse()
-	{
-		CharacterController cCont = this.GetComponent<CharacterController>();
-		if (cCont != null && cCont.enabled)
+	{		
+		RaycastHit[] downHits = Physics.SphereCastAll(new Ray(this.transform.position, -this.transform.up), 1f);
+		
+		RaycastHit[] sweepHits = Physics.SphereCastAll(new Ray(this.transform.position, this.transform.forward), UseDistance);
+		Vector3 midScreen = PlayerCamera.ScreenToWorldPoint(new Vector3(Screen.width/2f, Screen.height/2f, UseDistance/2f));
+		SortAfterDistance(sweepHits, midScreen);
+		
+		bool okObject = true;
+		for (int i = 0; i < sweepHits.Length; i++)
 		{
-			Vector3 startPos = this.transform.position + cCont.center + (Vector3.up * -cCont.height * 0.5f);
-			Vector3 endPos = startPos + Vector3.up * cCont.height;
-			
-			RaycastHit[] downHits = Physics.RaycastAll(this.transform.position, -this.transform.up, cCont.height);
-			
-			Vector3 forwardVec = this.transform.forward;
-			
-			RaycastHit[] sweepHits = Physics.CapsuleCastAll(startPos, endPos, cCont.radius, forwardVec, UseDistance);
-			Vector3 midScreen = PlayerCamera.ScreenToWorldPoint(new Vector3(Screen.width/2f, Screen.height/2f, 0f));
-			SortAfterDistance(sweepHits, midScreen);
-			
-			bool okObject = true;
-			for (int i = 0; i < sweepHits.Length; i++)
+			RaycastHit sweepHit = sweepHits[i];
+			if (sweepHit.collider.GetType () != typeof(TerrainCollider))
 			{
-				RaycastHit sweepHit = sweepHits[i];
-				if (sweepHit.collider.GetType () != typeof(TerrainCollider))
+				okObject = true;
+			
+				foreach (RaycastHit downHit in downHits)
 				{
-					foreach (RaycastHit downHit in downHits)
+					if (downHit.collider.GetType() != typeof(TerrainCollider))
 					{
-						if (downHit.collider.GetType() != typeof(TerrainCollider))
+						if (downHit.transform.root == sweepHit.transform.root)
 						{
-							if (downHit.collider.gameObject == sweepHit.collider.gameObject)
-							{
-								okObject = false;				
-							}
+							okObject = false;	
+							break;
 						}
 					}
-					
-					if (okObject)
-					{
-						GameObject hit = sweepHit.collider.transform.root.gameObject;
-	
-						if (UseObject(hit))
-							break;
-					}
-					else
-					{
-						Debug.LogWarning("Cannot pick up while standing on " + sweepHit.collider.gameObject);
-					}
 				}
+	
+				
+				if (okObject)
+				{
+					GameObject hit = sweepHit.collider.transform.root.gameObject;
+
+					if (UseObject(hit))
+						break;
+				}
+				else
+				{
+					//Debug.LogWarning("Cannot pick up while standing on " + sweepHit.collider.gameObject);
+				}		
 			}
-		}
-		else
-		{
-			Debug.LogError(this.gameObject + " has no enabled CharacterController");
 		}
 	}		
 

@@ -52,7 +52,7 @@ public class BuildingObject : UsableObject
 		MOVING
 	};
 	
-	private BuildingObjectState currentBOState = BuildingObjectState.PLACED;	
+	private BuildingObjectState currentBOState = BuildingObjectState.MOVING;	
 	
 	void Start()
 	{

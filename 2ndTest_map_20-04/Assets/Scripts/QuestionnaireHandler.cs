@@ -93,6 +93,7 @@ public class QuestionnaireHandler : MonoBehaviour {
 		{
 			if (GameStateHandler.GetCurrentGameState() == GameStateHandler.GameState.QUESTIONNAIRE)
 			{
+				scenarioHandlerRef.GetNewRandomScenario();
 				GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.PLAY);
 			}
 		}
@@ -174,7 +175,7 @@ public class QuestionnaireHandler : MonoBehaviour {
 		
 		if (pair.Key == "preferrence")
 		{
-			string[] preferrenceOptions = {"Mouse", "Keyboard"}; // update with scenarios
+			string[] preferrenceOptions = {"Mouse", "Mixed", "Keyboard"}; // update with scenarios
 			
 			preferrence = AddMultipleChoice(preferrenceOptions, pair.Value, pair.Key, preferrence);
 		}

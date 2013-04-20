@@ -89,17 +89,15 @@ public class CompletionChecker : MonoBehaviour {
 	{
 		bool duplicates = false;	
 		
-		GameObject parent = GameObject.Find("CompletionGroup");
-		
-		foreach (Transform child in parent.transform)
+		foreach (GameObject completionChecker in GameObject.FindGameObjectsWithTag("CompletionBox"))
 		{
-			if (child.gameObject != this.gameObject)
+			if (completionChecker.gameObject != this.gameObject)
 			{
-				CompletionChecker cc = child.gameObject.GetComponent<CompletionChecker>();
+				CompletionChecker cc = completionChecker.gameObject.GetComponent<CompletionChecker>();
 				
 				if (cc.collidingWith != null)
 				{
-					if (other == cc.collidingWith.gameObject)
+					if (other.transform.root.gameObject == cc.collidingWith.transform.root.gameObject)
 					{
 						duplicates = true;
 						break;
