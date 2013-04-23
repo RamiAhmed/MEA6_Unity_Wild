@@ -47,6 +47,8 @@ public class ScenarioHandler : MonoBehaviour {
 		availableScenarios.Add(Scenario.MOUSE);
 		availableScenarios.Add(Scenario.KEYBOARD);
 		availableScenarios.Add(Scenario.MIXED);
+		
+		RandomizeScenarios();
 	}
 	
 	public void GetNewRandomScenario()
@@ -55,17 +57,34 @@ public class ScenarioHandler : MonoBehaviour {
 		{
 			int randomIndex = UnityEngine.Random.Range(0, availableScenarios.Count);
 			
+			//Debug.Log("New random scenario: " + randomIndex);
+			
 			currentScenario = availableScenarios[randomIndex];
 			availableScenarios.RemoveAt(randomIndex);
 		}
 		else if (availableScenarios.Count == 1)
 		{
+			//Debug.Log("Only 1 new random scenario left");
 			currentScenario = availableScenarios[0];
 			availableScenarios.RemoveAt(0);
 		}
 		else
 		{
 			Debug.LogWarning("No new scenarios found!");
+		}
+	}
+	
+	private void RandomizeScenarios()
+	{
+		for (int i = 0; i < availableScenarios.Count; i++)
+		{
+			if (UnityEngine.Random.Range(0,2) == 0)
+			{
+				Scenario temp = availableScenarios[i];
+				int randomIndex = UnityEngine.Random.Range(i, availableScenarios.Count);
+				availableScenarios[i] = availableScenarios[randomIndex];
+				availableScenarios[randomIndex] = temp;
+			}
 		}
 	}
 }

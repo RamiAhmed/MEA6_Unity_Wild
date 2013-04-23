@@ -30,10 +30,11 @@ public class QuestionnaireHandler : MonoBehaviour {
 	
 	void Start() 
 	{
+		scenarioHandlerRef = this.GetComponent<ScenarioHandler>();
+		
 		if (bQuestionnaireEnabled)
 		{
 			googleManager = this.GetComponent<GoogleManager>();
-			scenarioHandlerRef = this.GetComponent<ScenarioHandler>();
 			playerRef = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
 			
 			answersList = new Dictionary<string,string>();
@@ -65,10 +66,6 @@ public class QuestionnaireHandler : MonoBehaviour {
 			questionnaireRect = new Rect((Screen.width/2f) - (qWidth/2f), (Screen.height/2f) - (qHeight/2f), qWidth, qHeight);
 			
 			windowStyle.normal.background = MakeColorTexture((int)qWidth+1, (int)qHeight+1, Color.black);
-		}
-		else
-		{
-			GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.PLAY);
 		}
 	}
 	

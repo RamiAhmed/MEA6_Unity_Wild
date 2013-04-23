@@ -48,6 +48,8 @@ public class PlayerController : MonoBehaviour {
 	
 	private Vector3 startPosition = Vector3.zero;
 	
+	private CharacterMotor charMotorRef = null;
+	
 	/******************************************************
 	 **************** INITIALIZATION **********************
 	 ******************************************************/
@@ -63,6 +65,8 @@ public class PlayerController : MonoBehaviour {
 		mouseLookComponent = this.gameObject.GetComponent<MouseLook>();
 		
 		scenarioHandler = GameObject.Find("ScenarioHandlerBox").GetComponent<ScenarioHandler>();
+		
+		charMotorRef = this.gameObject.GetComponent<CharacterMotor>();
 		
 		startPosition = this.transform.position;
 	}
@@ -199,7 +203,20 @@ public class PlayerController : MonoBehaviour {
 				else
 				{
 					// maybe we are rotating?
-					HandleObjectRotation();					
+					HandleObjectRotation();
+					
+					if (!Input.GetKey(KeyCode.LeftControl) 	&& !Input.GetKey(KeyCode.RightControl) 	&&
+						!Input.GetKey(KeyCode.LeftAlt) 		&& !Input.GetKey(KeyCode.RightAlt) 		&&
+						!Input.GetKey(KeyCode.LeftShift) 	&& !Input.GetKey(KeyCode.RightShift))	
+					{
+						if (!charMotorRef.canControl)
+							charMotorRef.canControl = true;	
+					}
+					else
+					{
+						if (charMotorRef.canControl)
+							charMotorRef.canControl = false;
+					}
 				}
 			}
 		}		
@@ -375,8 +392,7 @@ public class PlayerController : MonoBehaviour {
 			if (Screen.lockCursor)
 				Screen.lockCursor = false;
 			
-			SetPlayerActive(false);
-			
+			SetPlayerActive(false);			
 			//Debug.Log("Unlocking mouse cursor");
 		}
 	}
@@ -388,8 +404,7 @@ public class PlayerController : MonoBehaviour {
 			if (!Screen.lockCursor)
 				Screen.lockCursor = true;
 			
-			SetPlayerActive(true);
-			
+			SetPlayerActive(true);			
 			//Debug.Log("Lock mouse cursor");
 		}		
 	}
@@ -502,38 +517,53 @@ public class PlayerController : MonoBehaviour {
 		
 		return rotationVector;
 	}
-	
+
 	private Vector3 HandleKeyboardRotation()
 	{
+		float rotationSpeedFactor = 3.0f;
 		Vector3 rotationVector = Vector3.zero;
-		if (Input.GetKey(KeyCode.Keypad8)) // up on keypad
+		if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
 		{
-			rotationVector += this.transform.right;
+			if (Input.GetKey(KeyCode.W)) // up on keypad
+			{
+				rotationVector += this.transform.right;
+			}
+			else if (Input.GetKey(KeyCode.S)) // down on keypad
+			{
+				rotationVector += -this.transform.right;
+			}
+		}	
+		
+		else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+		{
+			if (Input.GetKey(KeyCode.A))
+			{
+				rotationVector += this.transform.up;
+			}
+			else if (Input.GetKey(KeyCode.D))
+			{
+				rotationVector += -this.transform.up;
+			}
 		}
-		else if (Input.GetKey(KeyCode.Keypad2)) // down on keypad
+		
+		else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
 		{
-			rotationVector += -this.transform.right;
-		}
-
-		if (Input.GetKey(KeyCode.Keypad7)) // left on keypad
-		{
-			rotationVector += this.transform.forward;
-		}
-		else if (Input.GetKey(KeyCode.Keypad9)) // right on keypad
-		{
-			rotationVector += -this.transform.forward;
-		}
-
-		if (Input.GetKey(KeyCode.Keypad4))
-		{
-			rotationVector += this.transform.up;
-		}
-		else if (Input.GetKey(KeyCode.Keypad6))
-		{
-			rotationVector += -this.transform.up;
+			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.W)) 
+			{
+				rotationVector += this.transform.forward;
+			}
+			else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.S)) 
+			{
+				rotationVector += -this.transform.forward;
+			}
 		}
 		
 		LockMouseCursor();
+		
+		if (rotationVector != Vector3.zero)
+		{
+			rotationVector *= rotationSpeedFactor;
+		}
 
 		return rotationVector;		
 	}
