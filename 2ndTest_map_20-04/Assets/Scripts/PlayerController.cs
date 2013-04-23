@@ -48,8 +48,6 @@ public class PlayerController : MonoBehaviour {
 	
 	private Vector3 startPosition = Vector3.zero;
 	
-	private Vector3 lastRotationVector = Vector3.zero;
-
 	/******************************************************
 	 **************** INITIALIZATION **********************
 	 ******************************************************/
@@ -158,24 +156,22 @@ public class PlayerController : MonoBehaviour {
 				// sweep in front of player in search of usable objects
 				SweepTestToUse();
 			}
-			else
-			{
-				PlaceObject();	
-			}
 		}
 			
-		/*
 		// if the player clicked left mouse button
 		if (Input.GetMouseButtonDown(0))
 		{
 			// if the player is currently using an object
 			if (UsedObject != null)
 			{
-				// place the currently used object
-				PlaceObject();
+				if (!Input.GetKey(KeyCode.LeftControl) 	&& !Input.GetKey(KeyCode.RightControl) 	&&
+					!Input.GetKey(KeyCode.LeftAlt) 		&& !Input.GetKey(KeyCode.RightAlt) 		&&
+					!Input.GetKey(KeyCode.LeftShift) 	&& !Input.GetKey(KeyCode.RightShift))				
+					// place the currently used object
+					PlaceObject();
 			}
 		}
-		*/
+		
 		
 		else if (Input.GetKey(KeyCode.Period))
 		{
@@ -195,13 +191,15 @@ public class PlayerController : MonoBehaviour {
 		{
 			// if we are not spawning object
 			if (!HandleObjectSpawning())
-			{
-				// maybe we are rotating?
-				HandleObjectRotation();
-				
+			{				
 				if (UsedObject == null)
 				{
 					LockMouseCursor();	
+				}
+				else
+				{
+					// maybe we are rotating?
+					HandleObjectRotation();					
 				}
 			}
 		}		
@@ -381,10 +379,6 @@ public class PlayerController : MonoBehaviour {
 			
 			//Debug.Log("Unlocking mouse cursor");
 		}
-		else
-		{
-			Debug.LogWarning("MouseLook component null");
-		}
 	}
 	
 	private void LockMouseCursor()
@@ -397,10 +391,6 @@ public class PlayerController : MonoBehaviour {
 			SetPlayerActive(true);
 			
 			//Debug.Log("Lock mouse cursor");
-		}
-		else
-		{
-			Debug.LogWarning("MouseLook component null");
 		}		
 	}
 
@@ -445,7 +435,7 @@ public class PlayerController : MonoBehaviour {
 			}
 			else
 			{
-				Debug.LogWarning(UsedObject + " is not a building object!");
+				//Debug.LogWarning(UsedObject + " is not a building object!");
 			}
 		}
 		
@@ -454,10 +444,11 @@ public class PlayerController : MonoBehaviour {
 	
 	private Vector3 HandleMouseRotation()
 	{
+		float rotationSpeedFactor = 3.0f;
 		Vector3 rotationVector = Vector3.zero;
 		bool bUnlockedMouse = false;
 		
-		if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) // control mapped to up-down
+		if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
 		{	
 			if (Input.GetMouseButton(0))
 			{
@@ -471,20 +462,7 @@ public class PlayerController : MonoBehaviour {
 			}
 		}
 		
-		else if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
-		{
-			if (Input.GetMouseButton(0))
-			{
-				if (!bUnlockedMouse)
-				{
-					UnlockMouseCursor();
-					bUnlockedMouse = true;
-				}				
-				rotationVector += this.transform.forward * (Input.GetAxis("Mouse X") + Input.GetAxis("Mouse Y"));
-			}
-		}
-		
-		else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+		else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
 		{
 			if (Input.GetMouseButton(0))
 			{
@@ -497,22 +475,30 @@ public class PlayerController : MonoBehaviour {
 			}
 		}
 		
+		else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+		{
+			if (Input.GetMouseButton(0))
+			{
+				if (!bUnlockedMouse)
+				{
+					UnlockMouseCursor();
+					bUnlockedMouse = true;
+				}				
+				rotationVector += this.transform.forward * (Input.GetAxis("Mouse X") + Input.GetAxis("Mouse Y"));
+			}
+		}		
+		
 		if (rotationVector == Vector3.zero)
 		{
 			if (!bUnlockedMouse)
 			{
 				LockMouseCursor();	
-				lastRotationVector = Vector3.zero;
 			}
-			else
-			{
-				rotationVector += lastRotationVector;
-			}
-		}
+		}	
 		else
 		{
-			lastRotationVector = rotationVector;
-		}		
+			rotationVector *= rotationSpeedFactor;	
+		}
 		
 		return rotationVector;
 	}
@@ -569,17 +555,17 @@ public class PlayerController : MonoBehaviour {
 				}
 				else
 				{
-					Debug.Log("Cannot place " + UsedObject + " at this position");
+					//Debug.Log("Cannot place " + UsedObject + " at this position");
 				}
 			}
 			else
 			{
-				Debug.LogWarning(UsedObject + " is not a building object!");
+				//Debug.LogWarning(UsedObject + " is not a building object!");
 			}	
 		}
 		else
 		{
-			Debug.LogWarning("Cannot place again so soon");
+			//Debug.LogWarning("Cannot place again so soon");
 		}
 	}
 	
@@ -654,12 +640,12 @@ public class PlayerController : MonoBehaviour {
 			}
 			else
 			{
-				Debug.Log(go + " is not usable");
+				//Debug.Log(go + " is not usable");
 			}
 		}
 		else
 		{
-			Debug.LogError("Could not use " + go);
+			//Debug.LogError("Could not use " + go);
 		}
 		
 		return success;
@@ -706,12 +692,12 @@ public class PlayerController : MonoBehaviour {
 			}
 			else
 			{
-				Debug.LogError("Could not instantiate " + Prefab);
+				//Debug.LogError("Could not instantiate " + Prefab);
 			}
 		}
 		else
 		{
-			Debug.LogWarning("Only one object can be used at a time");
+			//Debug.LogWarning("Only one object can be used at a time");
 		}
 		
 		return newBuildingObject;
@@ -736,7 +722,7 @@ public class PlayerController : MonoBehaviour {
 		}
 		else
 		{
-			Debug.LogWarning("No used object to clear references from");
+			//Debug.LogWarning("No used object to clear references from");
 		}
 	}		
 }

@@ -71,6 +71,7 @@ public class BuildingObject : UsableObject
 			this.transform.rotation = UnityEngine.Random.rotation;
 		
 		InitColliders();
+		SetCollidersInactive(true);
 		
 		if (GetHasUser())
 			currentBOState = BuildingObjectState.MOVING;
@@ -211,7 +212,8 @@ public class BuildingObject : UsableObject
 
 	private void UpdateRotation()
 	{
-		this.transform.RotateAround(this.transform.position, RotationVector, RotationSpeed);
+		this.transform.Rotate(RotationVector);
+		//this.transform.RotateAround(this.transform.position, RotationVector, RotationSpeed);
 	}
 	
 	private void InitColliders()
