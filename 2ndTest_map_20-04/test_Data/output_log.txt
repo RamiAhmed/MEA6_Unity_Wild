@@ -1,0 +1,45 @@
+Initialize engine version: 4.1.2f1 (911c7369eeac)
+GfxDevice: creating device client; threaded=1
+Direct3D:
+    Version:  Direct3D 9.0c [igdumd64.dll 8.15.10.2827]
+    Renderer: Intel(R) HD Graphics
+    Vendor:   Intel
+    VRAM:     880 MB (via DXGI)
+    Caps:     Shader=30 DepthRT=1 NativeDepth=1 NativeShadow=1 DF16=1 DF24=1 INTZ=1 RAWZ=0 NULL=1 RESZ=1 SlowINTZ=0
+Begin MonoManager ReloadAssembly
+Platform assembly: C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\UnityEngine.dll (this message is harmless)
+Loading C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Assembly-CSharp-firstpass.dll (this message is harmless)
+Loading C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Assembly-CSharp-firstpass.dll into Unity Child Domain
+Platform assembly: C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Assembly-CSharp.dll (this message is harmless)
+Loading C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
+Platform assembly: C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Assembly-UnityScript-firstpass.dll (this message is harmless)
+Loading C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Assembly-UnityScript-firstpass.dll into Unity Child Domain
+Platform assembly: C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Google.GData.AccessControl.DLL (this message is harmless)
+Loading C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Google.GData.AccessControl.DLL into Unity Child Domain
+Platform assembly: C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Google.GData.Client.dll (this message is harmless)
+Loading C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Google.GData.Client.dll into Unity Child Domain
+Platform assembly: C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Google.GData.Extensions.dll (this message is harmless)
+Loading C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Google.GData.Extensions.dll into Unity Child Domain
+Platform assembly: C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Google.GData.Spreadsheets.dll (this message is harmless)
+Loading C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Google.GData.Spreadsheets.dll into Unity Child Domain
+Platform assembly: C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Newtonsoft.Json.dll (this message is harmless)
+Loading C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Newtonsoft.Json.dll into Unity Child Domain
+- Completed reload, in  0.351 seconds
+desktop: 1366x768 60Hz; virtual: 1366x768 at 0,0
+<RI> Initializing input.
+<RI> Input initialized.
+Platform assembly: C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\System.dll (this message is harmless)
+Platform assembly: C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\System.Xml.dll (this message is harmless)
+Platform assembly: C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Mono.Security.dll (this message is harmless)
+GetCellValue Exception: Google.GData.Client.GDataRequestException: Execution of request failed: https://spreadsheets.google.com/feeds/cells/tI9BWGb9FKeRkKwZe8sYbFg/od6/private/full?min-row=2&max-row=2&min-col=33&max-col=33 ---> System.Net.WebException: The remote server returned an error: (400) Bad Request.
+  at System.Net.HttpWebRequest.CheckFinalStatus (System.Net.WebAsyncResult result) [0x00000] in <filename unknown>:0 
+  at System.Net.HttpWebRequest.SetResponseData (System.Net.WebConnectionData data) [0x00000] in <filename unknown>:0 
+  --- End of inner exception stack trace ---
+  at Google.GData.Client.GDataRequest.Execute () [0x00000] in <filename unknown>:0 
+  at Google.GData.Client.GDataGAuthRequest.Execute (Int32 retryCounter) [0x00000] in <filename unknown>:0 
+ 
+(Filename: C:/BuildAgent/work/7535de4ca26c26ac/Runtime/ExportGenerated/StandalonePlayer/UnityEngineDebug.cpp Line: 54)
+
+Platform assembly: C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\Boo.Lang.dll (this message is harmless)
+Platform assembly: C:\Users\jinx\Desktop\2ndTest_map_20-04\test_Data\Managed\System.Core.dll (this message is harmless)
