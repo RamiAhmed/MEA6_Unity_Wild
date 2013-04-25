@@ -176,16 +176,6 @@ public class PlayerController : MonoBehaviour {
 			}
 		}
 		
-		
-		else if (Input.GetKey(KeyCode.Period))
-		{
-			//Debug.Log ("Delete");
-			if (UsedObject != null)
-			{
-				ClearObjectReferences(true);		
-			}
-		}
-		
 		else if (Input.GetKey(KeyCode.F1))
 		{
 			CheckAssignmentCompletion(true);	
@@ -268,6 +258,14 @@ public class PlayerController : MonoBehaviour {
 		if (GUILayout.Button("Resume Game"))
 		{
 			GameStateHandler.SetCurrentGameState(GameStateHandler.GameState.PLAY);	
+		}
+		
+		else if (GUILayout.Button("Debug Fix Bugs"))
+		{
+			if (UsedObject != null)
+				ClearObjectReferences(true);	
+			else
+				this.transform.position = startPosition;
 		}
 			
 		if (scenarioHandler.GetScenarioCount() > 0)
